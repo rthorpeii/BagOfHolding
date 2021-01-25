@@ -1,0 +1,10 @@
+{
+    "name": "Amulet of the Devout, +1",
+    "type": "Wondrous Item",
+    "rarity": "1-Uncommon",
+    "attunement": false,
+    "link": "https://www.dndbeyond.com/magic-items/amulet-of-the-devout",
+    "charges": 0,
+    "source": "Tasha's Cauldron of Everything",
+    "cost": 400.0
+}
