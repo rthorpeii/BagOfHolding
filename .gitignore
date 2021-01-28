@@ -13,3 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+#Api
+/ui/bag-of-holding/node_modules
+/ui/bag-of-holding/.pnp
+/ui/bag-of-holding/.pnp.js
+/ui/bag-of-holding/package-lock.json

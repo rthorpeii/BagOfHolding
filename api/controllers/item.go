@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"BagOfHolding/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,14 +32,10 @@ func GetItem(c *gin.Context) {
 
 // CreateItemInput is the item input
 type CreateItemInput struct {
-	Name       string  `json:"name" binding:"required"`
-	Type       string  `json:"type" binding:"required"`
-	Rarity     string  `json:"rarity" binding:"required"`
-	Attunement bool    `json:"attunement"`
-	Link       string  `json:"link" binding:"required"`
-	Charges    int     `json:"charges"`
-	Source     string  `json:"source" binding:"required"`
-	Cost       float32 `json:"cost" binding:"required"`
+	Name   string  `json:"name" binding:"required"`
+	Type   string  `json:"type" binding:"required"`
+	Rarity string  `json:"rarity" binding:"required"`
+	Cost   float32 `json:"cost" binding:"required"`
 }
 
 // CreateItem Creates a new item
@@ -46,6 +43,7 @@ type CreateItemInput struct {
 func CreateItem(c *gin.Context) {
 	// Validate input
 	var input CreateItemInput
+	fmt.Println(c.Request.Form)
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -53,14 +51,10 @@ func CreateItem(c *gin.Context) {
 
 	// Create item
 	item := models.Item{
-		Name:       input.Name,
-		Type:       input.Type,
-		Rarity:     input.Rarity,
-		Attunement: input.Attunement,
-		Link:       input.Link,
-		Charges:    input.Charges,
-		Source:     input.Source,
-		Cost:       input.Cost}
+		Name:   input.Name,
+		Type:   input.Type,
+		Rarity: input.Rarity,
+		Cost:   input.Cost}
 	models.DB.Create(&item)
 
 	c.JSON(http.StatusOK, gin.H{"data": item})
@@ -68,14 +62,10 @@ func CreateItem(c *gin.Context) {
 
 // UpdateItemInput is the item input
 type UpdateItemInput struct {
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
-	Rarity     string  `json:"rarity"`
-	Attunement bool    `json:"attunement"`
-	Link       string  `json:"link"`
-	Charges    int     `json:"charges"`
-	Source     string  `json:"source"`
-	Cost       float32 `json:"cost"`
+	Name   string  `json:"name"`
+	Type   string  `json:"type"`
+	Rarity string  `json:"rarity"`
+	Cost   float32 `json:"cost"`
 }
 
 // UpdateItem updates an existing item based on its id
