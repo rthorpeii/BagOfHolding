@@ -30,6 +30,7 @@ func main() {
 	// inventory update endpoints
 	r.GET("/inventory/:user_id", controllers.GetInventory)
 	r.POST("/buy/:item_id", controllers.BuyItem)
+	r.POST("/sell/:item_id", controllers.SellItem)
 
 	r.Run()
 }

@@ -59,3 +59,50 @@ func BuyItem(c *gin.Context) {
 	models.DB.Model(&inventory).Updates(inventory)
 	c.JSON(http.StatusOK, gin.H{"data": inventory})
 }
+
+// SellItemInput is the item input
+type SellItemInput struct {
+	UserID uint `json:"user_id" binding:"required"`
+}
+
+// SellItem Sells an item
+// POST /buy/:item_id
+func SellItem(c *gin.Context) {
+	// Validate input
+	var input SellItemInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate item being sold
+	var item models.Item
+	if err := models.DB.Where("id = ?", c.Param("item_id")).First(&item).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Item not found!"})
+		return
+	}
+
+	// Look to see if item is owned by the user
+	var inventory models.Inventory
+	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
+		Where("user_id = ? and item_id = ?", input.UserID, item.ID).Preload("Item").First(&inventory).Error; err != nil {
+		// Item not in inventory
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You don't own this item"})
+		return
+	}
+
+	// Update the count of the item owned
+	inventory.Count--
+
+	if inventory.Count == 0 {
+		if err := models.DB.Delete(&inventory).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error removing the last instance of an item"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"data": "1"})
+
+		}
+		return
+	}
+	models.DB.Model(&inventory).Updates(inventory)
+	c.JSON(http.StatusOK, gin.H{"data": inventory})
+}

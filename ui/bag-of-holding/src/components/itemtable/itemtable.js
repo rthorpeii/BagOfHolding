@@ -178,7 +178,7 @@ export default function ItemTable() {
                         }
                     </div>
                     <MaterialTable
-                        title="UseItem list from API"
+                        title="Defined Items"
                         columns={columns}
                         data={data}
                         icons={tableIcons}

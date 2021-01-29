@@ -48,7 +48,7 @@ const tableIcons = {
 };
 
 
-export default function ItemTable() {
+export default function InventoryTable() {
 
     const [data, setData] = useState([]); //table data
 
@@ -91,12 +91,17 @@ export default function ItemTable() {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        api.delete("/items/" + oldData.id)
+        console.log(oldData)
+        api.post("/sell/" + oldData.item_id, {"user_id": oldData.user_id})
             .then(res => {
                 const dataDelete = [...data];
-                const index = oldData.tableData.id;
-                dataDelete.splice(index, 1);
-                setData([...dataDelete]);
+                oldData.count--
+                if (oldData.count === 0) {
+                    const index = oldData.tableData.id;
+                    dataDelete.splice(index, 1);
+                    setData([...dataDelete]);
+                }
+
                 resolve()
             })
             .catch(error => {
@@ -145,22 +150,23 @@ export default function ItemTable() {
 
 
     useEffect(() => {
-        api.get("/items")
+        api.get("/inventory/1")
             .then(res => {
                 setData(res.data.data)
             })
             .catch(error => {
-                setErrorMessages(["Cannot load item data"])
+                setErrorMessages(["Cannot load inventory data"])
                 setIserror(true)
             })
     }, [])
 
     var columns = [
         { title: "id", field: "id", hidden: true },
-        { title: "Item name", field: "name" },
-        { title: "Type", field: "type" },
-        { title: "Rarity", field: "rarity" },
-        { title: "Cost", field: "cost", type: "numeric" }
+        { title: "user_id", field: "user_id", hidden: true },
+        { title: "item_id", field: "user_id", hidden: true },
+        { title: "Item Name", field: "Item.name" },
+        { title: "Cost", field: "Item.cost", type: "numeric" },
+        { title: "Count", field: "count", type: "numeric" }
     ]
 
     return (
@@ -178,7 +184,7 @@ export default function ItemTable() {
                         }
                     </div>
                     <MaterialTable
-                        title="UseItem list from API"
+                        title="Items Owned"
                         columns={columns}
                         data={data}
                         icons={tableIcons}

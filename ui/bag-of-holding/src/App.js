@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Box, Tabs, Tab, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
 import ItemTable from './components/itemtable/itemtable';
 import { createMuiTheme } from '@material-ui/core/styles';
+import InventoryTable from './components/inventory';
 
 const theme = createMuiTheme({
   palette: {
@@ -44,7 +45,7 @@ export default function App() {
         <ItemTable></ItemTable>
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Item Two
+        <InventoryTable></InventoryTable>
         </TabPanel>
       <TabPanel value={value} index={2}>
         Item Three
