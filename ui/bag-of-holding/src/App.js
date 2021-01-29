@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
-import ItemCard from './components/items';
+import { Box, Tabs, Tab, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
 import ItemTable from './components/itemtable/itemtable';
 import { createMuiTheme } from '@material-ui/core/styles';
 
@@ -10,45 +9,46 @@ const theme = createMuiTheme({
   },
 });
 
-class App extends Component {
-  render() {
-    return (
-      <ThemeProvider theme={theme}>
-      <CssBaseline/>
-        <Container>
-          <header className="App-header">
-            <ItemCard items={this.state.items} />
-            <Button variant="contained" color="primary">Hello World</Button>
-            <p>
-              Edit <code>src/App.js</code> and save to reload.
-          </p>
-            <a
-              className="App-link"
-              href="https://reactjs.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn React
-          </a>
-          </header>
-          <ItemTable></ItemTable>
-        </Container>
-      </ThemeProvider>
-    )
-  }
 
-  state = {
-    items: []
+
+export default function App() {
+
+
+
+
+  const [value, setValue] = React.useState(0);
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
-  componentDidMount() {
-    fetch('http://localhost:8080/items')
-      .then(res => res.json())
-      .then((data) => {
-        console.log('STUFF: ' + JSON.stringify(data))
-        this.setState({ items: data.data })
-      })
-      .catch(console.log)
+  function TabPanel(props) {
+    const { children, value, index, ...other } = props; return (
+      <div {...other}>
+        {value === index && <Box p={3}>{children}</Box>}
+      </div>
+    );
   }
+  return (
+
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container>
+        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+          <Tab label="Items" />
+          <Tab label="Inventory" />
+          <Tab label="Item Three" />
+        </Tabs>
+
+      </Container>
+      <TabPanel value={value} index={0}>
+        <ItemTable></ItemTable>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        Item Two
+        </TabPanel>
+      <TabPanel value={value} index={2}>
+        Item Three
+        </TabPanel>
+    </ThemeProvider>
+  )
 }
-export default App;

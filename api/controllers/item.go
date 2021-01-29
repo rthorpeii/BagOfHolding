@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"BagOfHolding/models"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,6 @@ type CreateItemInput struct {
 func CreateItem(c *gin.Context) {
 	// Validate input
 	var input CreateItemInput
-	fmt.Println(c.Request.Form)
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

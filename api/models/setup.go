@@ -17,6 +17,8 @@ func ConnectDataBase() {
 		panic("Failed to connect to database!")
 	}
 	database.AutoMigrate(&Item{})
+	database.AutoMigrate(&Inventory{})
+	database.LogMode(true)
 
 	DB = database
 }
