@@ -45,7 +45,8 @@ func BuyItem(c *gin.Context) {
 
 	// Look to see if item is already owned by user
 	var inventory models.Inventory
-	if err := models.DB.Joins("Item").Where("user_id = ? AND item_id = ?", input.UserID, item.ID).First(&inventory).Error; err != nil {
+	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
+		Where("user_id = ? and item_id = ?", input.UserID, item.ID).Preload("Item").First(&inventory).Error; err != nil {
 		// First time buying this item
 		inventory = models.Inventory{UserID: input.UserID, ItemID: item.ID, Item: item, Count: 1}
 		models.DB.Create(&inventory)
