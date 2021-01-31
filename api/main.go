@@ -23,6 +23,7 @@ func main() {
 	// /item endpoints
 	r.GET("/items", controllers.GetItems)
 	r.GET("/items/:id", controllers.GetItem)
+	r.GET("/names/", controllers.GetItemNames)
 	r.POST("/items", controllers.CreateItem)
 	r.PATCH("/items/:id", controllers.UpdateItem)
 	r.DELETE("/items/:id", controllers.DeleteItem)

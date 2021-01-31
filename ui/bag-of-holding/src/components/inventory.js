@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
 import Grid from '@material-ui/core/Grid'
+import TextField from '@material-ui/core/TextField';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import MaterialTable from "material-table";
 import AddBox from '@material-ui/icons/AddBox';
@@ -21,6 +23,16 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 
 import axios from 'axios'
 import Alert from '@material-ui/lab/Alert';
+import { Button, Card, CardContent, CardHeader, Typography } from '@material-ui/core';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+const useStyles = makeStyles((theme) => ({
+    root: {
+    },
+    details: {
+        display: "flex",
+        flexDirection: "row",
+    },
+}));
 
 
 const api = axios.create({
@@ -50,50 +62,69 @@ const tableIcons = {
 
 export default function InventoryTable() {
 
+    const classes = useStyles();
+
     const [data, setData] = useState([]); //table data
+    const [items, setItems] = useState([])    // Item data for predicting item fill
+    const [selected, setSelected] = useState({})
+    const [costTotal, setCostTotal] = useState([])
 
     //for error handling
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
-    const handleRowAdd = (newData, resolve) => {
-        //validation
-        let errorList = []
-        if (newData.name === undefined) {
-            errorList.push("Please enter item name")
-        } if (newData.type === undefined) {
-            errorList.push("Please enter item type")
-        } if (newData.rarity === undefined) {
-            errorList.push("Please enter rarity")
-        } if (newData.cost === undefined || newData.cost < 0) {
-            errorList.push("Please enter a proper cost")
-        } if (errorList.length < 1) { //no error
-            api.post("/items", newData)
-                .then(res => {
-                    let dataToAdd = [...data];
-                    resolve()
-                    newData.id = res.data.data.id
-                    dataToAdd.push(newData);
-                    setData(dataToAdd);
-                    setErrorMessages([])
-                    setIserror(false)
-                })
-                .catch(error => {
-                    setErrorMessages(["Cannot add data. Server error!"])
-                    setIserror(true)
-                    resolve()
-                })
-        } else {
-            setErrorMessages(errorList)
-            setIserror(true)
-            resolve()
-        }
+    const sumCost = (items) => {
+        setCostTotal([items.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)])
     }
 
-    const handleRowDelete = (oldData, resolve) => {
-        console.log(oldData)
-        api.post("/sell/" + oldData.item_id, {"user_id": oldData.user_id})
+    const buyItem = () => {
+        // No object has been selected yet.
+        if (Object.keys(selected).length === 0 && selected.constructor === Object) {
+            setErrorMessages(["Please Select an Item"])
+            setIserror(true)
+            return
+        }
+        // Purchase the selected item
+        api.post("/buy/" + selected.ID, { "user_id": 1 })
             .then(res => {
+                console.log(res)
+                setData(res.data.data)
+                setIserror(false)
+                sumCost(res.data.data)
+            })
+    }
+
+    const onAutofillChange = (event, values) => {
+        setSelected(values)
+    }
+
+    const getItemNames = () => {
+        api.get("/names/")
+            .then(res => {
+                setItems(res.data.items)
+            })
+            .catch(error => {
+                setErrorMessages(["Cannot load item names"])
+                setIserror(true)
+            })
+    }
+
+    const getInventory = () => {
+        api.get("/inventory/1")
+            .then(res => {
+                setData(res.data.data)
+                sumCost(res.data.data)
+            })
+            .catch(error => {
+                setErrorMessages(["Cannot load inventory data"])
+                setIserror(true)
+            })
+    }
+
+    const handleRowDelete = (oldData) => {
+        api.post("/sell/" + oldData.item_id, { "user_id": oldData.user_id })
+            .then(res => {
+                console.log("made it")
                 const dataDelete = [...data];
                 oldData.count--
                 if (oldData.count === 0) {
@@ -101,63 +132,20 @@ export default function InventoryTable() {
                     dataDelete.splice(index, 1);
                     setData([...dataDelete]);
                 }
-
-                resolve()
+                console.log("Finished?")
+                sumCost(dataDelete)
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error"])
                 setIserror(true)
-                resolve()
             })
     }
-
-    const handleRowUpdate = (newData, oldData, resolve) => {  //validation
-        let errorList = []
-        if (newData.name === undefined) {
-            errorList.push("Please enter item name")
-        } if (newData.type === undefined) {
-            errorList.push("Please enter item type")
-        } if (newData.rarity === undefined) {
-            errorList.push("Please enter rarity")
-        } if (newData.cost === undefined || newData.cost < 0) {
-            errorList.push("Please enter a proper cost")
-        }
-
-        if (errorList.length < 1) {
-            api.patch("/items/" + newData.id, newData)
-                .then(res => {
-                    const dataUpdate = [...data];
-                    const index = oldData.tableData.id;
-                    dataUpdate[index] = newData;
-                    setData([...dataUpdate]);
-                    resolve()
-                    setIserror(false)
-                    setErrorMessages([])
-                })
-                .catch(error => {
-                    setErrorMessages(["Update failed! Server error"])
-                    setIserror(true)
-                    resolve()
-
-                })
-        } else {
-            setErrorMessages(errorList)
-            setIserror(true)
-            resolve()
-
-        }
-    }
-
 
     useEffect(() => {
-        api.get("/inventory/1")
-            .then(res => {
-                setData(res.data.data)
-            })
-            .catch(error => {
-                setErrorMessages(["Cannot load inventory data"])
-                setIserror(true)
-            })
+        // Load the inventory Data
+        getInventory()
+        // Get item names for use in the purchase dropdown
+        getItemNames()
     }, [])
 
     var columns = [
@@ -171,9 +159,46 @@ export default function InventoryTable() {
 
     return (
         <div className="App">
-            <Grid container spacing={1}>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={10}>
+            <Grid container spacing={3}>
+                <Grid item xs={2} />
+                <Grid item xs={4}>
+                    <Card className={classes.root}>
+                        <CardHeader title="Purchase an Item" />
+                        <div className={classes.details}>
+                            <CardContent>
+                                <Autocomplete
+                                    id="purchase-selection"
+                                    options={items}
+                                    getOptionLabel={(option) => option.Name}
+                                    style={{ width: 300 }}
+                                    onChange={onAutofillChange}
+                                    renderInput={(params) => <TextField {...params} label="Item to purchase" variant="outlined" />}
+                                />
+                            </CardContent>
+                            <CardContent>
+                                <Button variant="contained"
+                                    color="primary"
+                                    onClick={buyItem}>
+                                    Purchase
+                                </Button>
+                            </CardContent>
+                        </div>
+                    </Card>
+
+                </Grid>
+                <Grid item xs={4}>
+                    <Card>
+                        <CardHeader title="Inventory Total Cost" />
+                        <div className={classes.details}>
+                            <CardContent>
+                                <Typography variant="h4">{costTotal}</Typography>
+                            </CardContent>
+                        </div>
+                    </Card>
+                </Grid>
+                <Grid item xs={1} />
+                <Grid item xs={2} />
+                <Grid item xs={8}>
                     <div>
                         {iserror &&
                             <Alert severity="error">
@@ -189,17 +214,10 @@ export default function InventoryTable() {
                         data={data}
                         icons={tableIcons}
                         editable={{
-                            onRowUpdate: (newData, oldData) =>
-                                new Promise((resolve) => {
-                                    handleRowUpdate(newData, oldData, resolve);
-                                }),
-                            onRowAdd: (newData) =>
-                                new Promise((resolve) => {
-                                    handleRowAdd(newData, resolve)
-                                }),
                             onRowDelete: (oldData) =>
                                 new Promise((resolve) => {
-                                    handleRowDelete(oldData, resolve)
+                                    handleRowDelete(oldData)
+                                    resolve()
                                 }),
                         }}
                         options={{
@@ -207,7 +225,7 @@ export default function InventoryTable() {
                         }}
                     />
                 </Grid>
-                <Grid item xs={3}></Grid>
+                <Grid item xs={1}></Grid>
             </Grid >
         </div >
     )

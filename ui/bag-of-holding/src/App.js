@@ -3,6 +3,7 @@ import { Box, Tabs, Tab, Container, CssBaseline, ThemeProvider } from '@material
 import ItemTable from './components/itemtable/itemtable';
 import { createMuiTheme } from '@material-ui/core/styles';
 import InventoryTable from './components/inventory';
+import Header from './components/header'
 
 const theme = createMuiTheme({
   palette: {
@@ -13,9 +14,6 @@ const theme = createMuiTheme({
 
 
 export default function App() {
-
-
-
 
   const [value, setValue] = React.useState(0);
   const handleChange = (event, newValue) => {
@@ -33,11 +31,12 @@ export default function App() {
 
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Header/>
       <Container>
         <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
           <Tab label="Items" />
           <Tab label="Inventory" />
-          <Tab label="Item Three" />
+          <Tab label="TODO" />
         </Tabs>
 
       </Container>

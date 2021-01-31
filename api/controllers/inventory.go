@@ -2,18 +2,27 @@ package controllers
 
 import (
 	"BagOfHolding/models"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GetInventory gets a users inventory
-// GET /items/:user_id
-func GetInventory(c *gin.Context) {
+func findInventory(userID string) ([]models.Inventory, error) {
 	var userInventory []models.Inventory
-
 	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
-		Where("user_id = ?", c.Param("user_id")).Preload("Item").Find(&userInventory).Error; err != nil {
+		Where("user_id = ?", userID).Preload("Item").Find(&userInventory).Error; err != nil {
+		return userInventory, fmt.Errorf("Inventory not found")
+	}
+	return userInventory, nil
+}
+
+// GetInventory gets a users inventory
+// GET /inventory/:user_id
+func GetInventory(c *gin.Context) {
+	userInventory, err := findInventory(c.Param("user_id"))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Inventory not found!" + err.Error()})
 		return
 	}
@@ -50,14 +59,19 @@ func BuyItem(c *gin.Context) {
 		// First time buying this item
 		inventory = models.Inventory{UserID: input.UserID, ItemID: item.ID, Item: item, Count: 1}
 		models.DB.Create(&inventory)
-		c.JSON(http.StatusOK, gin.H{"data": inventory})
-		return
+	} else {
+		// Update the count of the item owned
+		inventory.Count++
+		models.DB.Model(&inventory).Updates(inventory)
 	}
 
-	// Update the count of the item owned
-	inventory.Count++
-	models.DB.Model(&inventory).Updates(inventory)
-	c.JSON(http.StatusOK, gin.H{"data": inventory})
+	userInventory, err := findInventory(strconv.FormatUint(uint64(input.UserID), 10))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Couldn't find user's inventory"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": userInventory})
+	return
 }
 
 // SellItemInput is the item input

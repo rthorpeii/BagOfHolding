@@ -29,6 +29,24 @@ func GetItem(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": item})
 }
 
+// GetItemNames gets a single item if it exists
+// GET /items/:id
+func GetItemNames(c *gin.Context) {
+	type ItemName struct {
+		Name string
+		ID   uint
+	}
+
+	var items []ItemName
+
+	if err := models.DB.Model(&models.Item{}).Find(&items).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Couldn't retrieve items"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
 // CreateItemInput is the item input
 type CreateItemInput struct {
 	Name   string  `json:"name" binding:"required"`

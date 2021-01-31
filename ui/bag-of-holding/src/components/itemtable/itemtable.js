@@ -71,7 +71,6 @@ export default function ItemTable() {
             api.post("/items", newData)
                 .then(res => {
                     let dataToAdd = [...data];
-                    resolve()
                     newData.id = res.data.data.id
                     dataToAdd.push(newData);
                     setData(dataToAdd);
@@ -81,12 +80,10 @@ export default function ItemTable() {
                 .catch(error => {
                     setErrorMessages(["Cannot add data. Server error!"])
                     setIserror(true)
-                    resolve()
                 })
         } else {
             setErrorMessages(errorList)
             setIserror(true)
-            resolve()
         }
     }
 
@@ -97,12 +94,10 @@ export default function ItemTable() {
                 const index = oldData.tableData.id;
                 dataDelete.splice(index, 1);
                 setData([...dataDelete]);
-                resolve()
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error"])
                 setIserror(true)
-                resolve()
             })
     }
 
@@ -125,21 +120,16 @@ export default function ItemTable() {
                     const index = oldData.tableData.id;
                     dataUpdate[index] = newData;
                     setData([...dataUpdate]);
-                    resolve()
                     setIserror(false)
                     setErrorMessages([])
                 })
                 .catch(error => {
                     setErrorMessages(["Update failed! Server error"])
                     setIserror(true)
-                    resolve()
-
                 })
         } else {
             setErrorMessages(errorList)
             setIserror(true)
-            resolve()
-
         }
     }
 
@@ -182,18 +172,22 @@ export default function ItemTable() {
                         columns={columns}
                         data={data}
                         icons={tableIcons}
+                    
                         editable={{
                             onRowUpdate: (newData, oldData) =>
                                 new Promise((resolve) => {
                                     handleRowUpdate(newData, oldData, resolve);
+                                    resolve()
                                 }),
                             onRowAdd: (newData) =>
                                 new Promise((resolve) => {
-                                    handleRowAdd(newData, resolve)
+                                    handleRowAdd(newData)
+                                    resolve()
                                 }),
                             onRowDelete: (oldData) =>
                                 new Promise((resolve) => {
                                     handleRowDelete(oldData, resolve)
+                                    resolve()
                                 }),
                         }}
                         options={{
