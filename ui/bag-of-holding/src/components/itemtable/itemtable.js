@@ -26,6 +26,8 @@ import Alert from '@material-ui/lab/Alert';
 const api = axios.create({
     baseURL: `http://localhost:8080/`
 })
+// api.defaults.headers.common = {'Authorization': `bearer ${window.localStorage.getItem("authToken")}`}
+
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -135,7 +137,11 @@ export default function ItemTable() {
 
 
     useEffect(() => {
-        api.get("/items")
+        api.get("/items", {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
             .then(res => {
                 setData(res.data.data)
             })
@@ -172,7 +178,7 @@ export default function ItemTable() {
                         columns={columns}
                         data={data}
                         icons={tableIcons}
-                    
+
                         editable={{
                             onRowUpdate: (newData, oldData) =>
                                 new Promise((resolve) => {

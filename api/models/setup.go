@@ -20,6 +20,7 @@ func ConnectDataBase() {
 	}
 	database.AutoMigrate(&Item{})
 	database.AutoMigrate(&Inventory{})
+	database.AutoMigrate(&User{})
 	database.Logger.LogMode(logger.Info)
 	// database.LogMode(true)
 

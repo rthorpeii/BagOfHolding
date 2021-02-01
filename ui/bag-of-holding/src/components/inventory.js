@@ -85,7 +85,11 @@ export default function InventoryTable() {
             return
         }
         // Purchase the selected item
-        api.post("/buy/" + selected.ID, { "user_id": 1 })
+        api.post("/buy/", { "item_id": selected.ID }, {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
             .then(res => {
                 console.log(res)
                 setData(res.data.data)
@@ -110,7 +114,11 @@ export default function InventoryTable() {
     }
 
     const getInventory = () => {
-        api.get("/inventory/1")
+        api.get("/inventory/", {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
             .then(res => {
                 setData(res.data.data)
                 sumCost(res.data.data)
@@ -122,7 +130,11 @@ export default function InventoryTable() {
     }
 
     const handleRowDelete = (oldData) => {
-        api.post("/sell/" + oldData.item_id, { "user_id": oldData.user_id })
+        api.post("/sell/", { "item_id": oldData.item_id }, {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
             .then(res => {
                 console.log("made it")
                 const dataDelete = [...data];
