@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import AuthContext from './components/authcontext'
+
+const AppWrapper = () => {
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  return (
+    <AuthContext.Provider value={{ loggedIn, setLoggedIn }}>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    </AuthContext.Provider>
+  )
+}
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <AppWrapper/>,
   document.getElementById('root')
 );
 

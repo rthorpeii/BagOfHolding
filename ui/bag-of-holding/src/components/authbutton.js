@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import AuthContext from './authcontext.js'
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
 var jwt = require('jsonwebtoken');
 
 function AuthButton() {
-    const [loggedIn, setLoggedIn] = useState(false);
+    const {loggedIn, setLoggedIn} = useContext(AuthContext)
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -55,27 +55,32 @@ function AuthButton() {
         window.localStorage.removeItem('authToken')
         setLoggedIn(false)
     }
-
     return (
-        <div>
-            { loggedIn ?
-                <GoogleLogout
-                    clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
-                    buttonText='Logout'
-                    onLogoutSuccess={onLogoutSuccess}
-                    onFailure={responseGoogle}
-                />
-                : <GoogleLogin
-                    clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
-                    buttonText="Login"
-                    onSuccess={onLoginSuccess}
-                    onFailure={responseGoogle}
-                    cookiePolicy={'single_host_origin'}
-                    isSignedIn={true}
-                />
-            }
-        </div>
+        <AuthContext.Consumer>
+            {({ loggedIn, setLoggedIn }) => (
+                <div>
+                    { loggedIn ?
+                        <GoogleLogout
+                            clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
+                            buttonText='Logout'
+                            onLogoutSuccess={onLogoutSuccess}
+                            onFailure={responseGoogle}
+                        />
+                        : <GoogleLogin
+                            clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
+                            buttonText="Login"
+                            onSuccess={onLoginSuccess}
+                            onFailure={responseGoogle}
+                            cookiePolicy={'single_host_origin'}
+                            isSignedIn={true}
+                        />
+                    }
+                </div>
+            )}
+        </AuthContext.Consumer>
     )
+
+
 
 }
 
