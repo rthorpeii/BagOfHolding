@@ -12,13 +12,13 @@ const AppWrapper = () => {
     <AuthContext.Provider value={{ loggedIn, setLoggedIn }}>
       <React.StrictMode>
         <App />
-      </React.StrictMode>,
+      </React.StrictMode>
     </AuthContext.Provider>
   )
 }
 
 ReactDOM.render(
-  <AppWrapper/>,
+  <AppWrapper />,
   document.getElementById('root')
 );
 

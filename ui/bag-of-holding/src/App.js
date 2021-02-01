@@ -31,24 +31,23 @@ export default function App() {
 
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Header/>
+      <Header />
       <Container>
         <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
           <Tab label="Items" />
           <Tab label="Inventory" />
           <Tab label="TODO" />
         </Tabs>
-
       </Container>
       <TabPanel value={value} index={0}>
         <ItemTable></ItemTable>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <InventoryTable></InventoryTable>
-        </TabPanel>
+      </TabPanel>
       <TabPanel value={value} index={2}>
         Item Three
-        </TabPanel>
+      </TabPanel>
     </ThemeProvider>
   )
 }
