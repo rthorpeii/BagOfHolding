@@ -4,12 +4,11 @@ import (
 	"BagOfHolding/models"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func findInventory(userID string) ([]models.Inventory, error) {
+func findInventory(userID, characterID interface{}) ([]models.Inventory, error) {
 	var userInventory []models.Inventory
 	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
 		Where("user_id = ?", userID).Preload("Item").Find(&userInventory).Error; err != nil {
@@ -19,10 +18,11 @@ func findInventory(userID string) ([]models.Inventory, error) {
 }
 
 // GetInventory gets a users inventory
-// GET /inventory/
+// GET /inventory/:char_id
 func GetInventory(c *gin.Context) {
 	userID, _ := c.Get("user_id")
-	userInventory, err := findInventory(fmt.Sprintf("%v", userID))
+	charID, _ := c.Params.Get("char_id")
+	userInventory, err := findInventory(userID, charID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Inventory not found!" + err.Error()})
 		return
@@ -33,11 +33,12 @@ func GetInventory(c *gin.Context) {
 
 // BuyItemInput is the item input
 type BuyItemInput struct {
-	ItemID uint `json:"item_id" binding:"required"`
+	ItemID      uint `json:"item_id" binding:"required"`
+	CharacterID uint `json:"character_id" binding:"required"`
 }
 
 // BuyItem Purchases an item
-// POST /buy/:item_id
+// POST /buy/
 func BuyItem(c *gin.Context) {
 	// Validate input
 	var input BuyItemInput
@@ -49,19 +50,23 @@ func BuyItem(c *gin.Context) {
 	rawID, _ := c.Get("user_id")
 	userID := fmt.Sprintf("%v", rawID)
 
+	// Validate that the User is the one with this Character
+	if err := models.DB.Where("user_id = ?", userID).First(&models.Character{}).Error; err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid Character/User pair"})
+	}
+
 	// Look to see if item is already owned by user
 	var inventory models.Inventory
 	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
-		Where("user_id = ? and item_id = ?", userID, input.ItemID).Preload("Item").First(&inventory).Error; err != nil {
+		Where("character_id = ? and item_id = ?", input.CharacterID, input.ItemID).Preload("Item").First(&inventory).Error; err != nil {
 		// First time buying this item
 		// Validate item being purchased
 		var item models.Item
 		if err := models.DB.Where("id = ?", input.ItemID).First(&item).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Item not found!"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Item not found!"})
 			return
 		}
-		intUserID, _ := strconv.ParseUint(userID, 10, 64)
-		inventory = models.Inventory{UserID: uint(intUserID), ItemID: item.ID, Item: item, Count: 1}
+		inventory = models.Inventory{CharacterID: input.CharacterID, ItemID: item.ID, Item: item, Count: 1}
 		models.DB.Create(&inventory)
 	} else {
 		// Update the count of the item owned
@@ -69,7 +74,7 @@ func BuyItem(c *gin.Context) {
 		models.DB.Model(&inventory).Updates(inventory)
 	}
 
-	userInventory, err := findInventory(userID)
+	userInventory, err := findInventory(userID, input.CharacterID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Couldn't find user's inventory"})
 		return

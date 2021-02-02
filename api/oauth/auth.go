@@ -19,12 +19,12 @@ func AuthorizeUser(c *gin.Context) {
 	// Get and validate the Authorization header
 	authHeader := c.GetHeader("authorization")
 	if authHeader == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("No Auth header")})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "No Auth header"})
 		return
 	}
 	authParts := strings.Split(authHeader, " ")
-	if len(authParts) != 2 || authParts[0] != "bearer" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("Invalid AuthHeader")})
+	if len(authParts) != 2 || strings.ToLower(authParts[0]) != "bearer" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid AuthHeader"})
 		return
 	}
 	// Validate the token that's in the auth header
@@ -32,12 +32,12 @@ func AuthorizeUser(c *gin.Context) {
 	creds, err := google.FindDefaultCredentials(ctx, compute.ComputeScope)
 	payload, err := idtoken.Validate(ctx, authParts[1], creds.ProjectID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("Invalid Bearer Token: %v", err)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("Invalid Bearer Token: %v", err).Error()})
 		return
 	}
 	email := fmt.Sprintf("%v", payload.Claims["email"])
 	if email == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("No email found in claims")})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "No email found in claims"})
 		return
 	}
 

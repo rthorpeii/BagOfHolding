@@ -35,6 +35,11 @@ func main() {
 	authorized := r.Group("/", oauth.AuthorizeUser)
 	authorized.GET("/items", controllers.GetItems)
 
+	// Character endpoints
+	authorized.GET("/characters/", controllers.GetCharacters)
+	authorized.POST("/characters/", controllers.CreateCharacter)
+
+	// Inventory management
 	authorized.GET("/inventory/", controllers.GetInventory)
 	authorized.POST("/buy/", controllers.BuyItem)
 	authorized.POST("/sell/", controllers.SellItem)
