@@ -32,6 +32,12 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "row",
     },
+    mergecard: {
+        display: "flex",
+        flexDirection: "row",
+        border: "none",
+        boxShadow: "none"
+    },
 }));
 
 
@@ -66,7 +72,9 @@ export default function InventoryTable() {
 
     const [data, setData] = useState([]); //table data
     const [items, setItems] = useState([])    // Item data for predicting item fill
-    const [selected, setSelected] = useState({})
+    const [characters, setCharacters] = useState([])
+    const [selectedItem, setSelectedItem] = useState({})
+    const [selectedCharacter, setSelectedCharacter] = useState({})
     const [costTotal, setCostTotal] = useState([])
 
     //for error handling
@@ -78,14 +86,24 @@ export default function InventoryTable() {
     }
 
     const buyItem = () => {
-        // No object has been selected yet.
-        if (Object.keys(selected).length === 0 && selected.constructor === Object) {
+        
+        if (Object.keys(selectedItem).length === 0 && selectedItem.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
             setIserror(true)
             return
         }
+        if (Object.keys(selectedCharacter).length === 0 && selectedCharacter.constructor === Object) {
+            setErrorMessages(["Please Select a Character"])
+            setIserror(true)
+            return
+        }
+        // No object has been selected yet.
+        var payload = {
+            "character_id": selectedCharacter.id,
+            "item_id": selectedItem.ID
+        }
         // Purchase the selected item
-        api.post("/buy/", { "item_id": selected.ID }, {
+        api.post("/buy/", payload, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -95,11 +113,19 @@ export default function InventoryTable() {
                 setData(res.data.data)
                 setIserror(false)
                 sumCost(res.data.data)
+            }).catch(error => {
+                setErrorMessages(["Cannot purchase Item"])
+                setIserror(true)
             })
     }
 
-    const onAutofillChange = (event, values) => {
-        setSelected(values)
+    const onItemAutofillChange = (event, values) => {
+        setSelectedItem(values)
+    }
+
+    const onCharAutofillChange = async (event, values) => {
+        console.log("Character selected: ", values)
+        setSelectedCharacter(values)
     }
 
     const getItemNames = () => {
@@ -113,8 +139,24 @@ export default function InventoryTable() {
             })
     }
 
+    const getCharacters = () => {
+        api.get("/characters/", {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
+            .then(res => {
+                setCharacters(res.data.data)
+                setSelectedCharacter(res.data.data[0])
+            })
+            .catch(error => {
+                setErrorMessages(["Cannot load character names"])
+                setIserror(true)
+            })
+    }
+
     const getInventory = () => {
-        api.get("/inventory/", {
+        api.get("/inventory/"+selectedCharacter.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -130,7 +172,12 @@ export default function InventoryTable() {
     }
 
     const handleRowDelete = (oldData) => {
-        api.post("/sell/", { "item_id": oldData.item_id }, {
+        // No object has been selected yet.
+        var payload = {
+            "character_id": selectedCharacter.id,
+            "item_id": selectedItem.ID
+        }
+        api.post("/sell/", payload, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -156,8 +203,12 @@ export default function InventoryTable() {
     useEffect(() => {
         // Load the inventory Data
         getInventory()
+    }, [selectedCharacter])
+    useEffect(() => {
         // Get item names for use in the purchase dropdown
         getItemNames()
+        // Get the characters
+        getCharacters()
     }, [])
 
     var columns = [
@@ -183,7 +234,7 @@ export default function InventoryTable() {
                                     options={items}
                                     getOptionLabel={(option) => option.Name}
                                     style={{ width: 300 }}
-                                    onChange={onAutofillChange}
+                                    onChange={onItemAutofillChange}
                                     renderInput={(params) => <TextField {...params} label="Item to purchase" variant="outlined" />}
                                 />
                             </CardContent>
@@ -199,14 +250,31 @@ export default function InventoryTable() {
 
                 </Grid>
                 <Grid item xs={4}>
-                    <Card>
-                        <CardHeader title="Inventory Total Cost" />
-                        <div className={classes.details}>
-                            <CardContent>
-                                <Typography variant="h4">{costTotal}</Typography>
-                            </CardContent>
-                        </div>
-                    </Card>
+                    <div className={classes.info}>
+                        <Card className={classes.mergecard} square={true}>
+                            <CardHeader title="Inventory Cost:" />
+                            <div className={classes.details}>
+                                <CardContent>
+                                    <Typography variant="h4">{costTotal} gp</Typography>
+                                </CardContent>
+                            </div>
+                        </Card>
+                        <Card className={classes.mergecard} square={true}>
+                            <div className={classes.details}>
+                                <CardContent>
+                                    <Autocomplete
+                                        id="character-selection"
+                                        value={selectedCharacter}
+                                        options={characters}
+                                        getOptionLabel={(option) => option.name}
+                                        style={{ width: 300 }}
+                                        onChange={onCharAutofillChange}
+                                        renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
+                                    />
+                                </CardContent>
+                            </div>
+                        </Card>
+                    </div>
                 </Grid>
                 <Grid item xs={1} />
                 <Grid item xs={2} />

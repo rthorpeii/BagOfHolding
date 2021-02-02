@@ -40,7 +40,7 @@ func main() {
 	authorized.POST("/characters/", controllers.CreateCharacter)
 
 	// Inventory management
-	authorized.GET("/inventory/", controllers.GetInventory)
+	authorized.GET("/inventory/:char_id", controllers.GetInventory)
 	authorized.POST("/buy/", controllers.BuyItem)
 	authorized.POST("/sell/", controllers.SellItem)
 

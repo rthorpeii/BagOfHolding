@@ -11,8 +11,8 @@ import (
 func findInventory(userID, characterID interface{}) ([]models.Inventory, error) {
 	var userInventory []models.Inventory
 	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
-		Where("user_id = ?", userID).Preload("Item").Find(&userInventory).Error; err != nil {
-		return userInventory, fmt.Errorf("Inventory not found")
+		Where("character_id = ?", characterID).Preload("Item").Find(&userInventory).Error; err != nil {
+		return userInventory, fmt.Errorf("Error finding inventory: %v", err)
 	}
 	return userInventory, nil
 }
@@ -85,7 +85,8 @@ func BuyItem(c *gin.Context) {
 
 // SellItemInput is the item input
 type SellItemInput struct {
-	ItemID uint `json:"item_id" binding:"required"`
+	ItemID      uint `json:"item_id" binding:"required"`
+	CharacterID uint `json:"character_id" binding:"required"`
 }
 
 // SellItem Sells an item
@@ -101,10 +102,15 @@ func SellItem(c *gin.Context) {
 	rawID, _ := c.Get("user_id")
 	userID := fmt.Sprintf("%v", rawID)
 
+	// Validate that the User is the one with this Character
+	if err := models.DB.Where("user_id = ?", userID).First(&models.Character{}).Error; err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid Character/User pair"})
+	}
+
 	// Look to see if item is owned by the user
 	var inventory models.Inventory
 	if err := models.DB.Joins("JOIN items on inventories.item_id = items.id").
-		Where("user_id = ? and item_id = ?", userID, input.ItemID).Preload("Item").First(&inventory).Error; err != nil {
+		Where("character_id = ? and item_id = ?", input.CharacterID, input.ItemID).Preload("Item").First(&inventory).Error; err != nil {
 		// Item not in inventory
 		c.JSON(http.StatusBadRequest, gin.H{"error": "You don't own this item"})
 		return
