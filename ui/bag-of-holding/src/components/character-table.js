@@ -19,13 +19,8 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 
-import axios from 'axios'
+import ApiClient from './api-client'
 import Alert from '@material-ui/lab/Alert';
-
-
-const api = axios.create({
-    baseURL: `http://localhost:8080/api`
-})
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -61,7 +56,7 @@ export default function CharacterTable() {
         if (newData.name === undefined) {
             errorList.push("Please enter character name")
         } if (errorList.length < 1) { //no error
-            api.post("/characters/", newData, {
+            ApiClient.post("/characters/", newData, {
                 headers: {
                     authorization: "bearer " + window.localStorage.getItem('authToken')
                 }
@@ -85,7 +80,7 @@ export default function CharacterTable() {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        api.delete("/characters/" + oldData.id, oldData, {
+        ApiClient.delete("/characters/" + oldData.id, oldData, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -103,7 +98,7 @@ export default function CharacterTable() {
     }
 
     useEffect(() => {
-        api.get("/characters/", {
+        ApiClient.get("/characters/", {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }

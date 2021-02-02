@@ -5,11 +5,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/idtoken"
 )
 
@@ -29,8 +28,8 @@ func AuthorizeUser(c *gin.Context) {
 	}
 	// Validate the token that's in the auth header
 	ctx := context.Background()
-	creds, err := google.FindDefaultCredentials(ctx, compute.ComputeScope)
-	payload, err := idtoken.Validate(ctx, authParts[1], creds.ProjectID)
+	audience := os.Getenv("GOOGLE_PROJECT_ID")
+	payload, err := idtoken.Validate(ctx, authParts[1], audience)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("Invalid Bearer Token: %v", err).Error()})
 		return

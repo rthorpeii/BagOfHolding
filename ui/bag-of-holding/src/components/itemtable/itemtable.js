@@ -19,15 +19,8 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 
-import axios from 'axios'
+import ApiClient from '../api-client'
 import Alert from '@material-ui/lab/Alert';
-
-
-const api = axios.create({
-    baseURL: `http://localhost:8080/api`
-})
-// api.defaults.headers.common = {'Authorization': `bearer ${window.localStorage.getItem("authToken")}`}
-
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -70,7 +63,7 @@ export default function ItemTable() {
         } if (newData.cost === undefined || newData.cost < 0) {
             errorList.push("Please enter a proper cost")
         } if (errorList.length < 1) { //no error
-            api.post("/items", newData)
+            ApiClient.post("/items", newData)
                 .then(res => {
                     let dataToAdd = [...data];
                     newData.id = res.data.data.id
@@ -90,7 +83,7 @@ export default function ItemTable() {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        api.delete("/items/" + oldData.id)
+        ApiClient.delete("/items/" + oldData.id)
             .then(res => {
                 const dataDelete = [...data];
                 const index = oldData.tableData.id;
@@ -116,7 +109,7 @@ export default function ItemTable() {
         }
 
         if (errorList.length < 1) {
-            api.patch("/items/" + newData.id, newData)
+            ApiClient.patch("/items/" + newData.id, newData)
                 .then(res => {
                     const dataUpdate = [...data];
                     const index = oldData.tableData.id;
@@ -137,7 +130,7 @@ export default function ItemTable() {
 
 
     useEffect(() => {
-        api.get("/items", {
+        ApiClient.get("/items", {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }

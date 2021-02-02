@@ -21,7 +21,7 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 
-import axios from 'axios'
+import ApiClient from '../api-client'
 import Alert from '@material-ui/lab/Alert';
 import { Button, Card, CardContent, CardHeader, Typography } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -39,11 +39,6 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: "none"
     },
 }));
-
-
-const api = axios.create({
-    baseURL: `http://localhost:8080/api`
-})
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -103,7 +98,7 @@ export default function InventoryTable() {
             "item_id": selectedItem.ID
         }
         // Purchase the selected item
-        api.post("/buy/", payload, {
+        ApiClient.post("/buy/", payload, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -129,7 +124,7 @@ export default function InventoryTable() {
     }
 
     const getItemNames = () => {
-        api.get("/names/")
+        ApiClient.get("/names/")
             .then(res => {
                 setItems(res.data.items)
             })
@@ -140,7 +135,7 @@ export default function InventoryTable() {
     }
 
     const getCharacters = () => {
-        api.get("/characters/", {
+        ApiClient.get("/characters/", {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -156,7 +151,7 @@ export default function InventoryTable() {
     }
 
     const getInventory = () => {
-        api.get("/inventory/"+selectedCharacter.id, {
+        ApiClient.get("/inventory/"+selectedCharacter.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
@@ -177,7 +172,7 @@ export default function InventoryTable() {
             "character_id": selectedCharacter.id,
             "item_id": selectedItem.ID
         }
-        api.post("/sell/", payload, {
+        ApiClient.post("/sell/", payload, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
