@@ -24,7 +24,7 @@ import Alert from '@material-ui/lab/Alert';
 
 
 const api = axios.create({
-    baseURL: `http://localhost:8080/`
+    baseURL: `http://localhost:8080/api`
 })
 // api.defaults.headers.common = {'Authorization': `bearer ${window.localStorage.getItem("authToken")}`}
 

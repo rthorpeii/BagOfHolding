@@ -65,6 +65,7 @@ function AuthButton() {
                             buttonText='Logout'
                             onLogoutSuccess={onLogoutSuccess}
                             onFailure={responseGoogle}
+                            theme="dark"
                         />
                         : <GoogleLogin
                             clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
@@ -73,6 +74,7 @@ function AuthButton() {
                             onFailure={responseGoogle}
                             cookiePolicy={'single_host_origin'}
                             isSignedIn={true}
+                            theme="dark"
                         />
                     }
                 </div>
