@@ -151,6 +151,11 @@ export default function InventoryTable() {
     }
 
     const getInventory = () => {
+        if ( selectedCharacter == null || (Object.keys(selectedCharacter).length === 0 && selectedCharacter.constructor === Object)) {
+            setErrorMessages(["Please Select a Character"])
+            setIserror(true)
+            return
+        }
         ApiClient.get("/inventory/"+selectedCharacter.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
@@ -200,6 +205,8 @@ export default function InventoryTable() {
         getInventory()
     }, [selectedCharacter])
     useEffect(() => {
+        setIserror(false)
+        setErrorMessages([])
         // Get item names for use in the purchase dropdown
         getItemNames()
         // Get the characters
