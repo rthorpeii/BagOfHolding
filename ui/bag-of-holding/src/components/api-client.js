@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 export const ApiClient = axios.create({
-  baseURL: 'https://handy-haversack.herokuapp.com/api/',
+  // Production
+  // baseURL: 'https://handy-haversack.herokuapp.com/api/',
+  // Development
+  baseURL: 'http://localhost:8080/api/',
   timeout: 1000,
 });
 

@@ -32,11 +32,10 @@ func main() {
 	public.POST("/items", controllers.CreateItem)
 	public.PATCH("/items/:id", controllers.UpdateItem)
 	public.DELETE("/items/:id", controllers.DeleteItem)
+	public.GET("/items", controllers.GetItems)
 
 	// Authorized endpoints
 	authorized := router.Group("/api", oauth.AuthorizeUser)
-	// inventory update endpoints
-	authorized.GET("/items", controllers.GetItems)
 	// Character endpoints
 	authorized.GET("/characters/", controllers.GetCharacters)
 	authorized.POST("/characters/", controllers.CreateCharacter)

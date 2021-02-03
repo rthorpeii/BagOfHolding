@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { forwardRef } from 'react';
 import Grid from '@material-ui/core/Grid'
 
@@ -21,6 +21,7 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 
 import ApiClient from '../api-client'
 import Alert from '@material-ui/lab/Alert';
+import AuthContext from '../authcontext'
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -153,49 +154,53 @@ export default function ItemTable() {
     ]
 
     return (
-        <div className="App">
-            <Grid container spacing={1}>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={10}>
-                    <div>
-                        {iserror &&
-                            <Alert severity="error">
-                                {errorMessages.map((msg, i) => {
-                                    return <div key={i}>{msg}</div>
-                                })}
-                            </Alert>
-                        }
-                    </div>
-                    <MaterialTable
-                        title="Defined Items"
-                        columns={columns}
-                        data={data}
-                        icons={tableIcons}
+        <AuthContext.Consumer>
+            {({ loggedIn, setLoggedIn }) => (
+                <div className="App">
+                    <Grid container spacing={1}>
+                        <Grid item xs={1}></Grid>
+                        <Grid item xs={10}>
+                            <div>
+                                {iserror &&
+                                    <Alert severity="error">
+                                        {errorMessages.map((msg, i) => {
+                                            return <div key={i}>{msg}</div>
+                                        })}
+                                    </Alert>
+                                }
+                            </div>
+                            <MaterialTable
+                                title="Defined Items"
+                                columns={columns}
+                                data={data}
+                                icons={tableIcons}
 
-                        editable={{
-                            onRowUpdate: (newData, oldData) =>
-                                new Promise((resolve) => {
-                                    handleRowUpdate(newData, oldData, resolve);
-                                    resolve()
-                                }),
-                            onRowAdd: (newData) =>
-                                new Promise((resolve) => {
-                                    handleRowAdd(newData)
-                                    resolve()
-                                }),
-                            onRowDelete: (oldData) =>
-                                new Promise((resolve) => {
-                                    handleRowDelete(oldData, resolve)
-                                    resolve()
-                                }),
-                        }}
-                        options={{
-                            actionsColumnIndex: -1
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={3}></Grid>
-            </Grid >
-        </div >
+                                editable={{
+                                    onRowUpdate: loggedIn ? (newData, oldData) =>
+                                        new Promise((resolve) => {
+                                            handleRowUpdate(newData, oldData, resolve);
+                                            resolve()
+                                        }) : null,
+                                    onRowAdd: loggedIn ? (newData) =>
+                                        new Promise((resolve) => {
+                                            handleRowAdd(newData)
+                                            resolve()
+                                        }) : null,
+                                    onRowDelete: loggedIn ? (oldData) =>
+                                        new Promise((resolve) => {
+                                            handleRowDelete(oldData, resolve)
+                                            resolve()
+                                        }) : null,
+                                }}
+                                options={{
+                                    actionsColumnIndex: -1
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={3}></Grid>
+                    </Grid >
+                </div >
+            )}
+        </AuthContext.Consumer>
     )
 }
