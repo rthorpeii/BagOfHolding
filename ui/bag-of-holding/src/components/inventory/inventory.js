@@ -23,21 +23,23 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 
 import ApiClient from '../api-client'
 import Alert from '@material-ui/lab/Alert';
-import { Button, Card, CardContent, CardHeader, Typography } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { Button, Card, CardContent, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
     root: {
+        height: "100%",
     },
-    details: {
+    top: {
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "row"
     },
     mergecard: {
-        display: "flex",
-        flexDirection: "row",
-        border: "none",
-        boxShadow: "none"
+        flexDirection: "column",
+        height: "100%",
     },
+    gold: {
+        paddingTop: '10px',
+    }
 }));
 
 const tableIcons = {
@@ -81,7 +83,7 @@ export default function InventoryTable() {
     }
 
     const buyItem = () => {
-        
+
         if (Object.keys(selectedItem).length === 0 && selectedItem.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
             setIserror(true)
@@ -150,26 +152,6 @@ export default function InventoryTable() {
             })
     }
 
-    const getInventory = () => {
-        if ( selectedCharacter == null || (Object.keys(selectedCharacter).length === 0 && selectedCharacter.constructor === Object)) {
-            setErrorMessages(["Please Select a Character"])
-            setIserror(true)
-            return
-        }
-        ApiClient.get("/inventory/"+selectedCharacter.id, {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
-            .then(res => {
-                setData(res.data.data)
-                sumCost(res.data.data)
-            })
-            .catch(error => {
-                setErrorMessages(["Cannot load inventory data"])
-                setIserror(true)
-            })
-    }
 
     const handleRowDelete = (oldData) => {
         // No object has been selected yet.
@@ -201,16 +183,36 @@ export default function InventoryTable() {
     }
 
     useEffect(() => {
-        // Load the inventory Data
-        getInventory()
+        if (selectedCharacter == null || (Object.keys(selectedCharacter).length === 0 && selectedCharacter.constructor === Object)) {
+            setErrorMessages(["Please Select a Character"])
+            setIserror(true)
+            return
+        }
+        ApiClient.get("/inventory/" + selectedCharacter.id, {
+            headers: {
+                authorization: "bearer " + window.localStorage.getItem('authToken')
+            }
+        })
+            .then(res => {
+                setData(res.data.data)
+                sumCost(res.data.data)
+            })
+            .catch(error => {
+                setErrorMessages(["Cannot load inventory data"])
+                setIserror(true)
+            })
     }, [selectedCharacter])
     useEffect(() => {
-        setIserror(false)
+        let mounted = true
+        if (mounted) {
+            setIserror(false)
+        }
         setErrorMessages([])
         // Get item names for use in the purchase dropdown
         getItemNames()
         // Get the characters
         getCharacters()
+        return () => mounted = false;
     }, [])
 
     var columns = [
@@ -224,63 +226,53 @@ export default function InventoryTable() {
 
     return (
         <div className="App">
-            <Grid container spacing={3}>
-                <Grid item xs={2} />
-                <Grid item xs={4}>
+            <Grid container spacing={1}>
+                <Grid item sm={12} md={2} />
+                <Grid item xs={12} sm={6} md={4}>
                     <Card className={classes.root}>
-                        <CardHeader title="Purchase an Item" />
-                        <div className={classes.details}>
-                            <CardContent>
-                                <Autocomplete
-                                    id="purchase-selection"
-                                    options={items}
-                                    getOptionLabel={(option) => option.Name}
-                                    style={{ width: 300 }}
-                                    onChange={onItemAutofillChange}
-                                    renderInput={(params) => <TextField {...params} label="Item to purchase" variant="outlined" />}
-                                />
-                            </CardContent>
-                            <CardContent>
-                                <Button variant="contained"
-                                    color="primary"
-                                    onClick={buyItem}>
-                                    Purchase
-                                </Button>
-                            </CardContent>
-                        </div>
-                    </Card>
-
-                </Grid>
-                <Grid item xs={4}>
-                    <div className={classes.info}>
-                        <Card className={classes.mergecard} square={true}>
-                            <CardHeader title="Inventory Cost:" />
-                            <div className={classes.details}>
-                                <CardContent>
-                                    <Typography variant="h4">{costTotal} gp</Typography>
-                                </CardContent>
-                            </div>
-                        </Card>
-                        <Card className={classes.mergecard} square={true}>
-                            <div className={classes.details}>
-                                <CardContent>
+                        <CardContent>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={6}>
                                     <Autocomplete
-                                        id="character-selection"
-                                        value={selectedCharacter}
-                                        options={characters}
-                                        getOptionLabel={(option) => option.name}
-                                        style={{ width: 300 }}
-                                        onChange={onCharAutofillChange}
-                                        renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
+                                        id="purchase-selection"
+                                        options={items}
+                                        getOptionLabel={(option) => option.Name}
+                                        onChange={onItemAutofillChange}
+                                        renderInput={(params) => <TextField {...params} label="Item to purchase" variant="outlined" />}
                                     />
-                                </CardContent>
-                            </div>
-                        </Card>
-                    </div>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <Button variant="contained"
+                                        color="primary"
+                                        onClick={buyItem}>
+                                        Purchase
+                                </Button>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Grid item xs={1} />
-                <Grid item xs={2} />
-                <Grid item xs={8}>
+                <Grid item xs={12} sm={6} md={4}>
+                    <Card className={classes.mergecard}>
+                        <CardContent>
+                            <Autocomplete
+                                id="character-selection"
+                                value={selectedCharacter}
+                                options={characters}
+                                getOptionLabel={(option) => option.name}
+                                onChange={onCharAutofillChange}
+                                renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
+                            />
+                            <Typography variant="h5" className={classes.gold}>
+                                Cost: {costTotal} gp
+                            </Typography>
+
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={false} sm={0} />
+                <Grid item xs={false} sm={0} md={2} />
+                <Grid item sm={12} md={8}>
                     <div>
                         {iserror &&
                             <Alert severity="error">

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
 import Grid from '@material-ui/core/Grid'
 
@@ -131,16 +131,12 @@ export default function ItemTable() {
 
 
     useEffect(() => {
-        ApiClient.get("/items", {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.get("/items")
             .then(res => {
                 setData(res.data.data)
             })
             .catch(error => {
-                setErrorMessages(["Cannot load item data"])
+                setErrorMessages(["Cannot load item data", error])
                 setIserror(true)
             })
     }, [])
@@ -155,11 +151,11 @@ export default function ItemTable() {
 
     return (
         <AuthContext.Consumer>
-            {({ loggedIn, setLoggedIn }) => (
+            {({ loggedIn }) => (
                 <div className="App">
                     <Grid container spacing={1}>
-                        <Grid item xs={1}></Grid>
-                        <Grid item xs={10}>
+                        <Grid item xs={2}></Grid>
+                        <Grid item xs={12} sm={8}>
                             <div>
                                 {iserror &&
                                     <Alert severity="error">

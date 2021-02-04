@@ -120,8 +120,8 @@ export default function CharacterTable() {
     return (
         <div className="App">
             <Grid container spacing={1}>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={10}>
+                <Grid item xs={2}></Grid>
+                <Grid item xs={12} sm={8}>
                     <div>
                         {iserror &&
                             <Alert severity="error">
@@ -150,11 +150,14 @@ export default function CharacterTable() {
                                 }),
                         }}
                         options={{
-                            actionsColumnIndex: -1
+                            actionsColumnIndex: -1,
+                            search: false
                         }}
                     />
                 </Grid>
-                <Grid item xs={3}></Grid>
+                <Grid item xs={3}>
+                    
+                </Grid>
             </Grid >
         </div >
     )

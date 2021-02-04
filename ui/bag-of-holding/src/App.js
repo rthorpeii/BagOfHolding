@@ -5,14 +5,13 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import InventoryTable from './components/inventory/inventory';
 import Header from './components/header'
 import CharacterTable from './components/character-table';
+import AuthContext from './components/authcontext'
 
 const theme = createMuiTheme({
     palette: {
         type: 'dark',
     },
 });
-
-
 
 export default function App() {
 
@@ -34,11 +33,15 @@ export default function App() {
             <CssBaseline />
             <Header />
             <Container>
-                <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
-                    <Tab label="Items" />
-                    <Tab label="Inventory" />
-                    <Tab label="Characters" />
-                </Tabs>
+                <AuthContext.Consumer>
+                    {({ loggedIn}) => (
+                        <Tabs value={value} onChange={handleChange}>
+                            <Tab label="Items" />
+                            <Tab label="Inventory" disabled={!loggedIn} />
+                            <Tab label="Characters" disabled={!loggedIn} />
+                        </Tabs>
+                    )}
+                </AuthContext.Consumer>
             </Container>
             <TabPanel value={value} index={0}>
                 <ItemTable></ItemTable>
@@ -47,7 +50,7 @@ export default function App() {
                 <InventoryTable></InventoryTable>
             </TabPanel>
             <TabPanel value={value} index={2}>
-                <CharacterTable/>
+                <CharacterTable />
             </TabPanel>
         </ThemeProvider>
     )

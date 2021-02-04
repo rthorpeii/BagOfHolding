@@ -5,21 +5,27 @@ import { GoogleLogin, GoogleLogout } from 'react-google-login';
 var jwt = require('jsonwebtoken');
 
 function AuthButton() {
-    const {loggedIn, setLoggedIn} = useContext(AuthContext)
 
+    const { setLoggedIn } = useContext(AuthContext)
     useEffect(() => {
+        let mounted = true;
         const token = localStorage.getItem('authToken');
         if (token === null) {
-            setLoggedIn(false)
-            return
+            if (mounted) {
+                setLoggedIn(false)
+            }
+            return () => mounted = false;
         }
         var decodedToken = jwt.decode(token, { complete: true })
         var dateNow = new Date();
 
         if (decodedToken.exp < dateNow.getTime()) {
-            setLoggedIn(true)
+            if (mounted) {
+                setLoggedIn(true)
+            }
         }
-    }, [])
+        return () => mounted = false;
+    }, [setLoggedIn])
 
     const refreshTokenSetup = (res) => {
         // Timing to renew access token
@@ -57,7 +63,7 @@ function AuthButton() {
     }
     return (
         <AuthContext.Consumer>
-            {({ loggedIn, setLoggedIn }) => (
+            {({ loggedIn }) => (
                 <div>
                     { loggedIn ?
                         <GoogleLogout
