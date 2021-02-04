@@ -5,7 +5,6 @@ export const ApiClient = axios.create({
   // baseURL: 'https://handy-haversack.herokuapp.com/api/',
   // Development
   baseURL: 'http://localhost:8080/api/',
-  timeout: 1000,
 });
 
 export default ApiClient

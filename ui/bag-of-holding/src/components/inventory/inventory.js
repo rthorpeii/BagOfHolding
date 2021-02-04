@@ -106,7 +106,6 @@ export default function InventoryTable() {
             }
         })
             .then(res => {
-                console.log(res)
                 setData(res.data.data)
                 setIserror(false)
                 sumCost(res.data.data)
@@ -121,7 +120,6 @@ export default function InventoryTable() {
     }
 
     const onCharAutofillChange = async (event, values) => {
-        console.log("Character selected: ", values)
         setSelectedCharacter(values)
     }
 
@@ -165,7 +163,6 @@ export default function InventoryTable() {
             }
         })
             .then(res => {
-                console.log("made it")
                 const dataDelete = [...data];
                 oldData.count--
                 if (oldData.count === 0) {
@@ -173,7 +170,6 @@ export default function InventoryTable() {
                     dataDelete.splice(index, 1);
                     setData([...dataDelete]);
                 }
-                console.log("Finished?")
                 sumCost(dataDelete)
             })
             .catch(error => {
@@ -203,6 +199,7 @@ export default function InventoryTable() {
             })
     }, [selectedCharacter])
     useEffect(() => {
+        console.log("ITEMS: ", items)
         let mounted = true
         if (mounted) {
             setIserror(false)
@@ -270,8 +267,8 @@ export default function InventoryTable() {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={false} sm={0} />
-                <Grid item xs={false} sm={0} md={2} />
+                <Grid item sm={1} />
+                <Grid item sm={1} md={2} />
                 <Grid item sm={12} md={8}>
                     <div>
                         {iserror &&

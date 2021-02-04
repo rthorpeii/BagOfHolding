@@ -34,7 +34,6 @@ function AuthButton() {
         const refreshToken = async () => {
             const newAuthRes = await res.reloadAuthResponse();
             refreshTiming = (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
-            console.log('newAuthRes:', newAuthRes);
             // saveUserToken(newAuthRes.access_token);  <-- save new token
             localStorage.setItem('authToken', newAuthRes.id_token);
 
@@ -46,12 +45,11 @@ function AuthButton() {
         setTimeout(refreshToken, refreshTiming);
     };
 
-    const responseGoogle = (response) => {
+    const onFailure = (response) => {
         console.log(response);
     }
 
     const onLoginSuccess = (response) => {
-        // console.log("Success: " + JSON.stringify(response))
         window.localStorage.setItem('authToken', response.tokenObj.id_token);
         refreshTokenSetup(response);
         setLoggedIn(true)
@@ -70,14 +68,14 @@ function AuthButton() {
                             clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
                             buttonText='Logout'
                             onLogoutSuccess={onLogoutSuccess}
-                            onFailure={responseGoogle}
+                            onFailure={onFailure}
                             theme="dark"
                         />
                         : <GoogleLogin
                             clientId="1090301103642-op1uhu99i3naegpk86siaqqf4nddn0c1.apps.googleusercontent.com"
                             buttonText="Login"
                             onSuccess={onLoginSuccess}
-                            onFailure={responseGoogle}
+                            onFailure={onFailure}
                             cookiePolicy={'single_host_origin'}
                             isSignedIn={true}
                             theme="dark"

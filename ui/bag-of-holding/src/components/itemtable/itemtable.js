@@ -136,7 +136,7 @@ export default function ItemTable() {
                 setData(res.data.data)
             })
             .catch(error => {
-                setErrorMessages(["Cannot load item data", error])
+                setErrorMessages(["Cannot load item data", error.error])
                 setIserror(true)
             })
     }, [])
