@@ -199,6 +199,7 @@ export default function InventoryTable() {
             })
     }, [selectedCharacter])
     useEffect(() => {
+        console.log("ITEMS: ", items)
         let mounted = true
         if (mounted) {
             setIserror(false)
