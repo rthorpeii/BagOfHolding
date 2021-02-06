@@ -44,3 +44,19 @@ func GetCharacters(c *gin.Context) {
 	models.DB.Where("user_id = ?", userID).Find(&characters)
 	c.JSON(http.StatusOK, gin.H{"data": characters})
 }
+
+// DeleteCharacters deletes the character matching the id
+// but only if the authenticated user owns that character
+// DELETE /characters/:id
+func DeleteCharacters(c *gin.Context) {
+	var character models.Character
+	userID, _ := c.Get("user_id")
+
+	// Look for a character owned by the user with the correct ID
+	if err := models.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&character).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Character not found!"})
+		return
+	}
+	models.DB.Delete(character)
+	c.JSON(http.StatusOK, gin.H{"data": true})
+}

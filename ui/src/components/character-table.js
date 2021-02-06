@@ -80,7 +80,7 @@ export default function CharacterTable() {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        ApiClient.delete("/characters/" + oldData.id, oldData, {
+        ApiClient.delete("/characters/" + oldData.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
