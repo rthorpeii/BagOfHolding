@@ -230,6 +230,23 @@ export default function InventoryTable() {
             <Grid container spacing={1}>
                 <Grid item sm={12} md={2} />
                 <Grid item xs={12} sm={6} md={4}>
+                    <Card className={classes.mergecard}>
+                        <CardContent>
+                            <Autocomplete
+                                id="character-selection"
+                                value={selectedCharacter}
+                                options={characters}
+                                getOptionLabel={(option) => option.name}
+                                onChange={onCharAutofillChange}
+                                renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
+                            />
+                            <Typography variant="h5" className={classes.gold}>
+                                Inventory Cost: {costTotal} gp
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
                     <Card className={classes.root}>
                         <CardContent>
                             <Grid container spacing={2}>
@@ -249,24 +266,6 @@ export default function InventoryTable() {
                                 </Button>
                                 </Grid>
                             </Grid>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                    <Card className={classes.mergecard}>
-                        <CardContent>
-                            <Autocomplete
-                                id="character-selection"
-                                value={selectedCharacter}
-                                options={characters}
-                                getOptionLabel={(option) => option.name}
-                                onChange={onCharAutofillChange}
-                                renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
-                            />
-                            <Typography variant="h5" className={classes.gold}>
-                                Cost: {costTotal} gp
-                            </Typography>
-
                         </CardContent>
                     </Card>
                 </Grid>
