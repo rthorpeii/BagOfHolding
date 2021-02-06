@@ -42,5 +42,5 @@ func AuthorizeUser(c *gin.Context) {
 
 	// Set the user id for use later
 	user := users.FindOrCreateUser(email)
-	c.Set("user_id", user.ID)
+	c.Set("user_id", fmt.Sprint(user.ID))
 }

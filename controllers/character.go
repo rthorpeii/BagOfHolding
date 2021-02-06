@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"BagOfHolding/models"
+	"BagOfHolding/users"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,10 +24,10 @@ func CreateCharacter(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userID, _ := c.Get("user_id")
+	userID, _ := strconv.ParseUint(c.GetString("user_id"), 10, 64)
 
 	character := models.Character{
-		UserID: userID.(uint),
+		UserID: uint(userID),
 		Name:   input.Name,
 	}
 	models.DB.Create(&character)
@@ -53,7 +55,7 @@ func DeleteCharacters(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
 	// Look for a character owned by the user with the correct ID
-	if err := models.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&character).Error; err != nil {
+	if !users.CharacterExists(userID, c.Param("id")) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Character not found!"})
 		return
 	}

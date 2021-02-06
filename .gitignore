@@ -16,6 +16,7 @@
 
 bag_of_holding_creds.json
 creds.json
+test.db
 
 #Api
 /ui/bag-of-holding/node_modules

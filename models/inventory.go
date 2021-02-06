@@ -6,5 +6,6 @@ type Inventory struct {
 	CharacterID uint `json:"character_id"`
 	ItemID      uint `json:"item_id"`
 	Item        Item
-	Count       int `json:"count"`
+	Consumed    bool `json:"consumed"`
+	Count       int  `json:"count"`
 }
