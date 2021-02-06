@@ -150,12 +150,17 @@ export default function InventoryTable() {
             })
     }
 
-
+    // Handles selling an item
     const handleRowDelete = (oldData) => {
-        // No object has been selected yet.
+        // Inconsistency in data fromt the inventory and the selected character
+        if (oldData.character_id !== selectedCharacter.id) {
+            setErrorMessages(["Delete failed! Character ID doesn't match Inventory ID"])
+            setIserror(true)
+            return
+        }
         var payload = {
-            "character_id": selectedCharacter.id,
-            "item_id": selectedItem.ID
+            "character_id": oldData.character_id,
+            "item_id": oldData.item_id
         }
         ApiClient.post("/sell/", payload, {
             headers: {
@@ -173,7 +178,7 @@ export default function InventoryTable() {
                 sumCost(dataDelete)
             })
             .catch(error => {
-                setErrorMessages(["Delete failed! Server error"])
+                setErrorMessages(["Delete failed! Server error", error.error])
                 setIserror(true)
             })
     }
@@ -199,7 +204,6 @@ export default function InventoryTable() {
             })
     }, [selectedCharacter])
     useEffect(() => {
-        console.log("ITEMS: ", items)
         let mounted = true
         if (mounted) {
             setIserror(false)
@@ -229,7 +233,7 @@ export default function InventoryTable() {
                     <Card className={classes.root}>
                         <CardContent>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={12} md={6}>
+                                <Grid item xs={12} sm={12} md={7}>
                                     <Autocomplete
                                         id="purchase-selection"
                                         options={items}
@@ -238,9 +242,8 @@ export default function InventoryTable() {
                                         renderInput={(params) => <TextField {...params} label="Item to purchase" variant="outlined" />}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6}>
+                                <Grid item xs={12} sm={12} md={5}>
                                     <Button variant="contained"
-                                        color="primary"
                                         onClick={buyItem}>
                                         Purchase
                                 </Button>

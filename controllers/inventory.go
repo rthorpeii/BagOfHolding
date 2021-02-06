@@ -53,6 +53,7 @@ func BuyItem(c *gin.Context) {
 	// Validate that the User is the one with this Character
 	if err := models.DB.Where("user_id = ?", userID).First(&models.Character{}).Error; err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid Character/User pair"})
+		return
 	}
 
 	// Look to see if item is already owned by user
@@ -105,6 +106,7 @@ func SellItem(c *gin.Context) {
 	// Validate that the User is the one with this Character
 	if err := models.DB.Where("user_id = ?", userID).First(&models.Character{}).Error; err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid Character/User pair"})
+		return
 	}
 
 	// Look to see if item is owned by the user
@@ -123,7 +125,6 @@ func SellItem(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Error removing the last instance of an item"})
 		} else {
 			c.JSON(http.StatusOK, gin.H{"data": "1"})
-
 		}
 		return
 	}
