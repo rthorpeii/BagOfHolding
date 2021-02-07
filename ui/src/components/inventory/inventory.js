@@ -20,6 +20,7 @@ import Remove from '@material-ui/icons/Remove';
 import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
+import EmojiFoodBeverageIcon from '@material-ui/icons/EmojiFoodBeverage';
 
 import ApiClient from '../api-client'
 import Alert from '@material-ui/lab/Alert';
@@ -42,32 +43,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const tableIcons = {
-    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-    Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-    DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
-    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-    SortArrow: forwardRef((props, ref) => <ArrowDownward {...props} ref={ref} />),
-    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
-    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
-};
-
 
 export default function InventoryTable() {
 
     const classes = useStyles();
 
     const [data, setData] = useState([]); //table data
+    const [consumed, setConsumed] = useState([]); //table data
     const [items, setItems] = useState([])    // Item data for predicting item fill
     const [characters, setCharacters] = useState([])
     const [selectedItem, setSelectedItem] = useState({})
@@ -78,12 +60,31 @@ export default function InventoryTable() {
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
-    const sumCost = (items) => {
-        setCostTotal([items.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)])
+    const sumCost = (owned, consumed) => {
+        var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
+        var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
+        setCostTotal(Number(ownedCost) + Number(consumedCost) / 2)
+    }
+
+    // updateItems takes the full inventory returned from the backend and
+    // splits it between items currently owned (data) and items consumed (consumed)
+    const updateItems = (items) => {
+        var tempConsumed = []
+        var tempOwned = []
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i]
+            if (item.consumed) {
+                tempConsumed.push(item)
+            } else {
+                tempOwned.push(item)
+            }
+        }
+        setData(tempOwned)
+        setConsumed(tempConsumed)
+        sumCost(tempOwned, tempConsumed)
     }
 
     const buyItem = () => {
-
         if (Object.keys(selectedItem).length === 0 && selectedItem.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
             setIserror(true)
@@ -106,9 +107,8 @@ export default function InventoryTable() {
             }
         })
             .then(res => {
-                setData(res.data.data)
+                updateItems(res.data.data)
                 setIserror(false)
-                sumCost(res.data.data)
             }).catch(error => {
                 setErrorMessages(["Cannot purchase Item"])
                 setIserror(true)
@@ -151,7 +151,7 @@ export default function InventoryTable() {
     }
 
     // Handles selling an item
-    const handleRowDelete = (oldData) => {
+    const removeItem = (oldData, consume) => {
         // Inconsistency in data fromt the inventory and the selected character
         if (oldData.character_id !== selectedCharacter.id) {
             setErrorMessages(["Delete failed! Character ID doesn't match Inventory ID"])
@@ -162,20 +162,31 @@ export default function InventoryTable() {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
         }
-        ApiClient.post("/sell/", payload, {
+        // What endpoint should we post to
+        var endpoint = ""
+        if (consume === true) {
+            endpoint = "/consume/"
+        } else {
+            endpoint = "/sell/"
+        }
+        ApiClient.post(endpoint, payload, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
         })
             .then(res => {
-                const dataDelete = [...data];
-                oldData.count--
-                if (oldData.count === 0) {
-                    const index = oldData.tableData.id;
-                    dataDelete.splice(index, 1);
-                    setData([...dataDelete]);
+                if (consume) {
+                    updateItems(res.data.data)
+                    setIserror(false)
+                } else {
+                    const dataDelete = [...data];
+                    oldData.count--
+                    if (oldData.count === 0) {
+                        const index = oldData.tableData.id;
+                        dataDelete.splice(index, 1);
+                        updateItems([...dataDelete]);
+                    }
                 }
-                sumCost(dataDelete)
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error", error.error])
@@ -195,8 +206,7 @@ export default function InventoryTable() {
             }
         })
             .then(res => {
-                setData(res.data.data)
-                sumCost(res.data.data)
+                updateItems(res.data.data)
             })
             .catch(error => {
                 setErrorMessages(["Cannot load inventory data"])
@@ -285,20 +295,41 @@ export default function InventoryTable() {
                         title="Items Owned"
                         columns={columns}
                         data={data}
-                        icons={tableIcons}
+                        // icons={tableIcons}
                         editable={{
                             onRowDelete: (oldData) =>
                                 new Promise((resolve) => {
-                                    handleRowDelete(oldData)
+                                    removeItem(oldData, false)
                                     resolve()
                                 }),
                         }}
+                        actions={[
+                            {
+                                icon: 'emoji_food_beverage',
+                                tooltip: 'Consume Item',
+                                onClick: (event, rowData) => new Promise((resolve) => {
+                                    removeItem(rowData, true)
+                                    resolve()
+                                }),
+                            }
+                        ]}
                         options={{
                             actionsColumnIndex: -1
                         }}
                     />
                 </Grid>
                 <Grid item xs={1}></Grid>
+                <Grid item sm={1} md={2} />
+                <Grid item sm={12} md={8}>
+                    <MaterialTable
+                        title="Items Consumed"
+                        columns={columns}
+                        data={consumed}
+                        options={{
+                            actionsColumnIndex: -1
+                        }}
+                    />
+                </Grid>
             </Grid >
         </div >
     )

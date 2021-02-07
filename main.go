@@ -42,6 +42,7 @@ func main() {
 	authorized.GET("/inventory/:char_id", controllers.GetInventory)
 	authorized.POST("/buy/", controllers.BuyItem)
 	authorized.POST("/sell/", controllers.SellItem)
+	authorized.POST("/consume/", controllers.ConsumeItem)
 
 	router.Run()
 }

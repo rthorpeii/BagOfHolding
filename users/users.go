@@ -15,7 +15,7 @@ func CharacterExists(userID, characterID interface{}) bool {
 }
 
 // FindInventory returns a slice of Inventory entries for the user/character pair passed in.
-func FindInventory(userID, characterID interface{}, consumed bool) ([]models.Inventory, error) {
+func FindInventory(userID, characterID interface{}) ([]models.Inventory, error) {
 	if !CharacterExists(userID, characterID) {
 		return nil, fmt.Errorf("Invalid Character/User pair")
 	}
@@ -23,7 +23,7 @@ func FindInventory(userID, characterID interface{}, consumed bool) ([]models.Inv
 	var userInventory []models.Inventory
 	if err := models.DB.
 		Joins("JOIN items on inventories.item_id = items.id").
-		Where("character_id = ? AND consumed = ?", characterID, consumed).
+		Where("character_id = ?", characterID).
 		Preload("Item").Find(&userInventory).Error; err != nil {
 		return nil, fmt.Errorf("Error finding inventory: %v", err)
 	}
