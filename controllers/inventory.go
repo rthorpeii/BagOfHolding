@@ -46,6 +46,7 @@ func BuyItem(c *gin.Context) {
 
 	// Look to see if this user has an inventory entry for this item
 	var inventory models.Inventory
+
 	if err := models.DB.
 		Joins("JOIN items on inventories.item_id = items.id").
 		Where("character_id = ? and item_id = ? and consumed = 0", input.CharacterID, input.ItemID).
