@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import AuthContext from './authcontext.js'
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 

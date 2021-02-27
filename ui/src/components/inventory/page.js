@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid'
 import MaterialTable from "material-table";
 import Alert from '@material-ui/lab/Alert';
@@ -10,7 +10,7 @@ import ConsumedTable from './consumed-table'
 import PurchaseCard from './purchase-card';
 
 
-export default function InventoryTable() {
+export default function InventoryPage() {
     const [data, setData] = useState([]); //table data
     const [consumed, setConsumed] = useState([]); //table data
     const [character, setCharacter] = useState({})
@@ -28,7 +28,7 @@ export default function InventoryTable() {
 
     // updateItems takes the full inventory returned from the backend and
     // splits it between items currently owned (data) and items consumed (consumed)
-    const updateItems = (items) => {
+    const updateItems = useCallback((items) => {
         var tempConsumed = []
         var tempOwned = []
         for (var i = 0; i < items.length; i++) {
@@ -43,7 +43,7 @@ export default function InventoryTable() {
         console.log("Consumed: ", tempConsumed)
         setConsumed(tempConsumed)
         sumCost(tempOwned, tempConsumed)
-    }
+    },[])
 
     const buyItem = (item) => {
         if (Object.keys(item).length === 0 && item.constructor === Object) {
@@ -140,7 +140,7 @@ export default function InventoryTable() {
                 setErrorMessages(["Cannot load inventory data"])
                 setIserror(true)
             })
-    }, [character])
+    }, [character, updateItems])
 
     // Set the error message to false on init
     useEffect(() => {

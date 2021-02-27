@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, makeStyles, TextField, Typography } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
@@ -16,6 +16,8 @@ const useStyles = makeStyles((_) => ({
 
 export default function CharacterCard(props) {
     const classes = useStyles();
+
+    const {costTotal, onChange} = props
     const [characters, setCharacters] = useState([])
     const [selected, setSelected] = useState({})
 
@@ -34,10 +36,12 @@ export default function CharacterCard(props) {
             })
     }
     
+    // When the selected value is updated, alert the parent
     useEffect(() => {
-        props.onChange(selected)
-    }, [selected])
+        onChange(selected)
+    }, [selected, onChange])
 
+    // On init load the characters
     useEffect(() => {
         getCharacters()
     }, [])
@@ -54,7 +58,7 @@ export default function CharacterCard(props) {
                     renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
                 />
                 <Typography variant="h5" className={classes.gold}>
-                    Inventory Cost: {props.costTotal} gp
+                    Inventory Cost: {costTotal} gp
                 </Typography>
             </CardContent>
         </Card>
