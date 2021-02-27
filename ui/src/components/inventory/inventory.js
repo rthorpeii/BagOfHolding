@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
 import MaterialTable from "material-table";
+import Alert from '@material-ui/lab/Alert';
 
 import ApiClient from '../api-client'
 import CharacterCard from './character-card'
-import Alert from '@material-ui/lab/Alert';
+import Columns from './columns'
+import ConsumedTable from './consumed-table'
 import PurchaseCard from './purchase-card';
 
 
@@ -38,6 +40,7 @@ export default function InventoryTable() {
             }
         }
         setData(tempOwned)
+        console.log("Consumed: ", tempConsumed)
         setConsumed(tempConsumed)
         sumCost(tempOwned, tempConsumed)
     }
@@ -116,12 +119,14 @@ export default function InventoryTable() {
             })
     }
 
+    // Update the inventory when a character is selected
     useEffect(() => {
         if (character == null || (Object.keys(character).length === 0 && character.constructor === Object)) {
             setErrorMessages(["Please Select a Character"])
             setIserror(true)
             return
         }
+        console.log("Character: ", character)
         ApiClient.get("/inventory/" + character.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
@@ -136,6 +141,8 @@ export default function InventoryTable() {
                 setIserror(true)
             })
     }, [character])
+
+    // Set the error message to false on init
     useEffect(() => {
         let mounted = true
         if (mounted) {
@@ -144,15 +151,6 @@ export default function InventoryTable() {
         setErrorMessages([])
         return () => mounted = false;
     }, [])
-
-    var columns = [
-        { title: "id", field: "id", hidden: true },
-        { title: "user_id", field: "user_id", hidden: true },
-        { title: "item_id", field: "user_id", hidden: true },
-        { title: "Item Name", field: "Item.name" },
-        { title: "Cost", field: "Item.cost", type: "numeric" },
-        { title: "Count", field: "count", type: "numeric" }
-    ]
 
     return (
         <div className="App">
@@ -181,7 +179,7 @@ export default function InventoryTable() {
                     </div>
                     <MaterialTable
                         title="Items Owned"
-                        columns={columns}
+                        columns={Columns}
                         data={data}
                         // icons={tableIcons}
                         editable={{
@@ -209,14 +207,7 @@ export default function InventoryTable() {
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />
                 <Grid item sm={12} md={8}>
-                    <MaterialTable
-                        title="Items Consumed"
-                        columns={columns}
-                        data={consumed}
-                        options={{
-                            actionsColumnIndex: -1
-                        }}
-                    />
+                    <ConsumedTable consumed={consumed}/>
                 </Grid>
             </Grid >
         </div >

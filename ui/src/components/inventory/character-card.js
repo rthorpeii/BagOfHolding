@@ -17,7 +17,7 @@ const useStyles = makeStyles((_) => ({
 export default function CharacterCard(props) {
     const classes = useStyles();
     const [characters, setCharacters] = useState([])
-    const [selected, setSelected] = useState([])
+    const [selected, setSelected] = useState({})
 
     const getCharacters = () => {
         ApiClient.get("/characters/", {
