@@ -44,11 +44,7 @@ export default function InventoryPage() {
             "item_id": item.ID
         }
         // Purchase the selected item
-        ApiClient.post("/buy/", payload, {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.post("/buy/", payload)
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
@@ -71,11 +67,7 @@ export default function InventoryPage() {
         if (consume === true) {
             endpoint = "/consume/"
         }
-        ApiClient.post(endpoint, payload, {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.post(endpoint, payload)
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
@@ -94,11 +86,7 @@ export default function InventoryPage() {
                 return
             }
         }
-        ApiClient.get("/inventory/" + character.id, {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.get("/inventory/" + character.id)
             .then(res => {
                 if (mounted) {
                     setOwned(res.data.owned)
@@ -162,7 +150,7 @@ export default function InventoryPage() {
                             </Alert>
                         }
                     </div>
-                    <Table owned={owned} removeItem={removeItem}/>
+                    <Table owned={owned} removeItem={removeItem} />
                 </Grid>
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />

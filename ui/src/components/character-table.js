@@ -18,11 +18,7 @@ export default function CharacterTable() {
         if (newData.name === undefined) {
             errorList.push("Please enter character name")
         } if (errorList.length < 1) { //no error
-            ApiClient.post("/characters/", newData, {
-                headers: {
-                    authorization: "bearer " + window.localStorage.getItem('authToken')
-                }
-            })
+            ApiClient.post("/characters/", newData)
                 .then(res => {
                     let dataToAdd = [...data];
                     newData.id = res.data.data.id
@@ -42,11 +38,7 @@ export default function CharacterTable() {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        ApiClient.delete("/characters/" + oldData.id, {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.delete("/characters/" + oldData.id)
             .then(res => {
                 const dataDelete = [...data];
                 const index = oldData.tableData.id;
@@ -60,11 +52,7 @@ export default function CharacterTable() {
     }
 
     useEffect(() => {
-        ApiClient.get("/characters/", {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.get("/characters/")
             .then(res => {
                 setData(res.data.data)
             })

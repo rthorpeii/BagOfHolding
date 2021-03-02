@@ -22,11 +22,7 @@ export default function CharacterCard(props) {
     const [selected, setSelected] = useState({})
 
     const getCharacters = () => {
-        ApiClient.get("/characters/", {
-            headers: {
-                authorization: "bearer " + window.localStorage.getItem('authToken')
-            }
-        })
+        ApiClient.get("/characters/")
             .then(res => {
                 setCharacters(res.data.data)
                 setSelected(res.data.data[0])
