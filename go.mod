@@ -1,7 +1,7 @@
 module BagOfHolding
 
-// +heroku goVersion go1.15
-go 1.15
+// +heroku goVersion go1.16
+go 1.16
 
 require (
 	github.com/gin-contrib/cors v1.3.1
