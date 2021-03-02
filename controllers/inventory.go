@@ -14,12 +14,17 @@ import (
 // GET /inventory/:char_id
 func GetInventory(c *gin.Context) {
 	fmt.Println("USERID: ", c.GetString("user_id"))
-	userInventory, err := users.FindInventory(c.GetString("user_id"), c.Param("char_id"))
+	owned, err := users.OwnedItems(c.GetString("user_id"), c.Param("char_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Inventory not found! " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": userInventory})
+	consumed, err := users.ConsumedItems(c.GetString("user_id"), c.Param("char_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Consumed items not found! " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"owned": owned, "consumed": consumed})
 }
 
 // BuyItemInput is the item input
@@ -70,13 +75,17 @@ func BuyItem(c *gin.Context) {
 	}
 
 	// Send back the user's inventory
-	userInventory, err := users.FindInventory(c.GetString("user_id"), input.CharacterID)
+	owned, err := users.OwnedItems(c.GetString("user_id"), input.CharacterID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Couldn't find user's inventory"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Inventory not found! " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": userInventory})
-	return
+	consumed, err := users.ConsumedItems(c.GetString("user_id"), input.CharacterID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Consumed items not found! " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"owned": owned, "consumed": consumed})
 }
 
 // SellItemInput is the item input
@@ -138,16 +147,18 @@ func removeAnItem(c *gin.Context, consume bool) (int, gin.H) {
 			consumedInventory.Count++
 			models.DB.Model(&consumedInventory).Updates(consumedInventory)
 		}
-
-		// Send back the user's inventory
-		userInventory, err := users.FindInventory(c.GetString("user_id"), input.CharacterID)
-		if err != nil {
-			return http.StatusInternalServerError, gin.H{"error": "Couldn't find user's inventory"}
-		}
-		return http.StatusOK, gin.H{"data": userInventory}
 	}
 
-	return http.StatusOK, gin.H{"data": inventory}
+	// Send back the user's inventory
+	owned, err := users.OwnedItems(c.GetString("user_id"), input.CharacterID)
+	if err != nil {
+		return http.StatusInternalServerError, gin.H{"error": "Couldn't find user's inventory"}
+	}
+	consumed, err := users.ConsumedItems(c.GetString("user_id"), input.CharacterID)
+	if err != nil {
+		return http.StatusInternalServerError, gin.H{"error": "Couldn't find user's consumed items"}
+	}
+	return http.StatusOK, gin.H{"owned": owned, "consumed": consumed}
 }
 
 // SellItem Sells one instance of an item for a character

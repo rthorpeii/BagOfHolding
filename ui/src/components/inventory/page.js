@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
 import MaterialTable from "material-table";
 import Alert from '@material-ui/lab/Alert';
@@ -19,31 +19,6 @@ export default function InventoryPage() {
     //for error handling
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
-
-    const sumCost = (owned, consumed) => {
-        var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
-        var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
-        setCostTotal(Number(ownedCost) + Number(consumedCost) / 2)
-    }
-
-    // updateItems takes the full inventory returned from the backend and
-    // splits it between items currently owned (data) and items consumed (consumed)
-    const updateItems = useCallback((items) => {
-        var tempConsumed = []
-        var tempOwned = []
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i]
-            if (item.consumed) {
-                tempConsumed.push(item)
-            } else {
-                tempOwned.push(item)
-            }
-        }
-        setData(tempOwned)
-        console.log("Consumed: ", tempConsumed)
-        setConsumed(tempConsumed)
-        sumCost(tempOwned, tempConsumed)
-    },[])
 
     const buyItem = (item) => {
         if (Object.keys(item).length === 0 && item.constructor === Object) {
@@ -67,7 +42,8 @@ export default function InventoryPage() {
             }
         })
             .then(res => {
-                updateItems(res.data.data)
+                setData(res.data.owned)
+                setConsumed(res.data.consumed)
                 setIserror(false)
             }).catch(error => {
                 setErrorMessages(["Cannot purchase Item"])
@@ -88,11 +64,9 @@ export default function InventoryPage() {
             "item_id": oldData.item_id
         }
         // What endpoint should we post to
-        var endpoint = ""
+        var endpoint = "/sell/"
         if (consume === true) {
             endpoint = "/consume/"
-        } else {
-            endpoint = "/sell/"
         }
         ApiClient.post(endpoint, payload, {
             headers: {
@@ -100,18 +74,8 @@ export default function InventoryPage() {
             }
         })
             .then(res => {
-                if (consume) {
-                    updateItems(res.data.data)
-                    setIserror(false)
-                } else {
-                    const dataDelete = [...data];
-                    oldData.count--
-                    if (oldData.count === 0) {
-                        const index = oldData.tableData.id;
-                        dataDelete.splice(index, 1);
-                        updateItems([...dataDelete]);
-                    }
-                }
+                setData(res.data.owned)
+                setConsumed(res.data.consumed)
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error", error.error])
@@ -126,21 +90,21 @@ export default function InventoryPage() {
             setIserror(true)
             return
         }
-        console.log("Character: ", character)
         ApiClient.get("/inventory/" + character.id, {
             headers: {
                 authorization: "bearer " + window.localStorage.getItem('authToken')
             }
         })
             .then(res => {
-                updateItems(res.data.data)
+                setData(res.data.owned)
+                setConsumed(res.data.consumed)
                 setIserror(false)
             })
             .catch(error => {
                 setErrorMessages(["Cannot load inventory data"])
                 setIserror(true)
             })
-    }, [character, updateItems])
+    }, [character])
 
     // Set the error message to false on init
     useEffect(() => {
@@ -151,6 +115,16 @@ export default function InventoryPage() {
         setErrorMessages([])
         return () => mounted = false;
     }, [])
+
+    useEffect(() => {
+        let mounted = true
+        var ownedCost = [data.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
+        var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
+        if (mounted) {
+            setCostTotal(Number(ownedCost) + Number(consumedCost) / 2)
+        }
+        return () => mounted = false;
+    }, [data, consumed])
 
     return (
         <div className="App">
@@ -207,7 +181,7 @@ export default function InventoryPage() {
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />
                 <Grid item sm={12} md={8}>
-                    <ConsumedTable consumed={consumed}/>
+                    <ConsumedTable consumed={consumed} />
                 </Grid>
             </Grid >
         </div >
