@@ -20,15 +20,22 @@ export default function InventoryPage() {
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
+    const validateCharacter = () => {
+        if (Object.keys(character).length === 0 && character.constructor === Object) {
+            setErrorMessages(["Please Select a Character"])
+            setIserror(true)
+            return false
+        }
+        return true
+    }
+
     const buyItem = (item) => {
         if (Object.keys(item).length === 0 && item.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
             setIserror(true)
             return
         }
-        if (Object.keys(character).length === 0 && character.constructor === Object) {
-            setErrorMessages(["Please Select a Character"])
-            setIserror(true)
+        if (!validateCharacter()) {
             return
         }
         var payload = {
@@ -53,12 +60,6 @@ export default function InventoryPage() {
 
     // Handles selling an item
     const removeItem = (oldData, consume) => {
-        // Inconsistency in data fromt the inventory and the selected character
-        if (oldData.character_id !== character.id) {
-            setErrorMessages(["Delete failed! Character ID doesn't match Inventory ID"])
-            setIserror(true)
-            return
-        }
         var payload = {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
@@ -85,9 +86,7 @@ export default function InventoryPage() {
 
     // Update the inventory when a character is selected
     useEffect(() => {
-        if (character == null || (Object.keys(character).length === 0 && character.constructor === Object)) {
-            setErrorMessages(["Please Select a Character"])
-            setIserror(true)
+        if (!validateCharacter()) {
             return
         }
         ApiClient.get("/inventory/" + character.id, {
