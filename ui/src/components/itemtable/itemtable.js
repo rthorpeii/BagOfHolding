@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
 import Alert from '@material-ui/lab/Alert';
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 
 import AuthContext from '../authcontext'
 import ApiClient from '../api-client'

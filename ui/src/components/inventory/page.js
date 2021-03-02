@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import Alert from '@material-ui/lab/Alert';
 
 import ApiClient from '../api-client'
@@ -19,6 +19,7 @@ export default function InventoryPage() {
     //for error handling
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
+    const columns = Columns
 
     const validateCharacter = () => {
         if (Object.keys(character).length === 0 && character.constructor === Object) {
@@ -60,6 +61,7 @@ export default function InventoryPage() {
 
     // Handles selling an item
     const removeItem = (oldData, consume) => {
+        console.log(data, consumed)
         var payload = {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
@@ -86,8 +88,11 @@ export default function InventoryPage() {
 
     // Update the inventory when a character is selected
     useEffect(() => {
-        if (!validateCharacter()) {
-            return
+        let mounted = true
+        if (mounted) {
+            if (!validateCharacter()) {
+                return
+            }
         }
         ApiClient.get("/inventory/" + character.id, {
             headers: {
@@ -95,14 +100,20 @@ export default function InventoryPage() {
             }
         })
             .then(res => {
-                setData(res.data.owned)
-                setConsumed(res.data.consumed)
-                setIserror(false)
+                if (mounted) {
+                    setData(res.data.owned)
+                    setConsumed(res.data.consumed)
+                    setIserror(false)
+                }
             })
             .catch(error => {
-                setErrorMessages(["Cannot load inventory data"])
-                setIserror(true)
+                if (mounted) {
+                    setErrorMessages(["Cannot load inventory data"])
+                    setIserror(true)
+                }
             })
+
+        return () => mounted = false;
     }, [character])
 
     // Set the error message to false on init
@@ -110,8 +121,8 @@ export default function InventoryPage() {
         let mounted = true
         if (mounted) {
             setIserror(false)
+            setErrorMessages([])
         }
-        setErrorMessages([])
         return () => mounted = false;
     }, [])
 
@@ -152,7 +163,7 @@ export default function InventoryPage() {
                     </div>
                     <MaterialTable
                         title="Items Owned"
-                        columns={Columns}
+                        columns={columns}
                         data={data}
                         // icons={tableIcons}
                         editable={{

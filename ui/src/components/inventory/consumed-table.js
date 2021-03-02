@@ -1,12 +1,13 @@
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 
 import Columns from './columns'
 
 export default function ConsumedTable(props) {
+    const columns = Columns
     return (
         <MaterialTable
             title="Items Consumed"
-            columns={Columns}
+            columns={columns}
             data={props.consumed}
             options={{
                 actionsColumnIndex: -1
