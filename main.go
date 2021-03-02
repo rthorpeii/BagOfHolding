@@ -21,7 +21,7 @@ func main() {
 	models.ConnectDataBase()
 
 	// React files
-	router.Use(static.Serve("/", static.LocalFile("./client/build", true)))
+	router.Use(static.Serve("/", static.LocalFile("./ui/build", true)))
 
 	// Public endpoints
 	public := router.Group("/api")
