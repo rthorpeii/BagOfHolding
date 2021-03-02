@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
-import MaterialTable from "@material-table/core";
 import Alert from '@material-ui/lab/Alert';
 
 import ApiClient from '../api-client'
 import CharacterCard from './character-card'
-import Columns from './columns'
 import ConsumedTable from './consumed-table'
 import PurchaseCard from './purchase-card';
+import Table from './table';
 
 
 export default function InventoryPage() {
-    const [data, setData] = useState([]); //table data
+    const [owned, setOwned] = useState([]); //table data
     const [consumed, setConsumed] = useState([]); //table data
     const [character, setCharacter] = useState({})
     const [costTotal, setCostTotal] = useState([])
@@ -19,8 +18,8 @@ export default function InventoryPage() {
     //for error handling
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
-    const columns = Columns
 
+    // Validates that a character is selected
     const validateCharacter = () => {
         if (Object.keys(character).length === 0 && character.constructor === Object) {
             setErrorMessages(["Please Select a Character"])
@@ -30,6 +29,7 @@ export default function InventoryPage() {
         return true
     }
 
+    // Handles purchasing an item
     const buyItem = (item) => {
         if (Object.keys(item).length === 0 && item.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
@@ -50,7 +50,7 @@ export default function InventoryPage() {
             }
         })
             .then(res => {
-                setData(res.data.owned)
+                setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
                 setIserror(false)
             }).catch(error => {
@@ -61,7 +61,7 @@ export default function InventoryPage() {
 
     // Handles selling an item
     const removeItem = (oldData, consume) => {
-        console.log(data, consumed)
+        console.log(owned, consumed)
         var payload = {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
@@ -77,7 +77,7 @@ export default function InventoryPage() {
             }
         })
             .then(res => {
-                setData(res.data.owned)
+                setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
             })
             .catch(error => {
@@ -101,7 +101,7 @@ export default function InventoryPage() {
         })
             .then(res => {
                 if (mounted) {
-                    setData(res.data.owned)
+                    setOwned(res.data.owned)
                     setConsumed(res.data.consumed)
                     setIserror(false)
                 }
@@ -126,15 +126,16 @@ export default function InventoryPage() {
         return () => mounted = false;
     }, [])
 
+    // Update the cost of the inventory when owned/consumed is updated
     useEffect(() => {
         let mounted = true
-        var ownedCost = [data.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
+        var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         if (mounted) {
             setCostTotal(Number(ownedCost) + Number(consumedCost) / 2)
         }
         return () => mounted = false;
-    }, [data, consumed])
+    }, [owned, consumed])
 
     return (
         <div className="App">
@@ -161,32 +162,7 @@ export default function InventoryPage() {
                             </Alert>
                         }
                     </div>
-                    <MaterialTable
-                        title="Items Owned"
-                        columns={columns}
-                        data={data}
-                        // icons={tableIcons}
-                        editable={{
-                            onRowDelete: (oldData) =>
-                                new Promise((resolve) => {
-                                    removeItem(oldData, false)
-                                    resolve()
-                                }),
-                        }}
-                        actions={[
-                            {
-                                icon: 'emoji_food_beverage',
-                                tooltip: 'Consume Item',
-                                onClick: (event, rowData) => new Promise((resolve) => {
-                                    removeItem(rowData, true)
-                                    resolve()
-                                }),
-                            }
-                        ]}
-                        options={{
-                            actionsColumnIndex: -1
-                        }}
-                    />
+                    <Table owned={owned} removeItem={removeItem}/>
                 </Grid>
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />
