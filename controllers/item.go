@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"BagOfHolding/models"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +10,6 @@ import (
 // GetItems gets all items
 // GET /items
 func GetItems(c *gin.Context) {
-	fmt.Println("Gonna get the items")
 	var items []models.Item
 	models.DB.Find(&items)
 	c.JSON(http.StatusOK, gin.H{"data": items})

@@ -3,7 +3,6 @@ package controllers
 import (
 	"BagOfHolding/models"
 	"BagOfHolding/users"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -37,10 +36,8 @@ func CreateCharacter(c *gin.Context) {
 // GetCharacters gets the characters of the authenticated user
 // GET /characters/
 func GetCharacters(c *gin.Context) {
-	fmt.Println("Character lookup happening")
 	var characters []models.Character
 	userID, _ := c.Get("user_id")
-	fmt.Println("Character lookup happening")
 
 	// We don't mind returning an empty list
 	models.DB.Where("user_id = ?", userID).Find(&characters)

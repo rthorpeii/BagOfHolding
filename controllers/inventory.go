@@ -3,7 +3,6 @@ package controllers
 import (
 	"BagOfHolding/models"
 	"BagOfHolding/users"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +12,6 @@ import (
 // GetInventory gets the inventory entries for a particular character owned by the user
 // GET /inventory/:char_id
 func GetInventory(c *gin.Context) {
-	fmt.Println("USERID: ", c.GetString("user_id"))
 	owned, err := users.OwnedItems(c.GetString("user_id"), c.Param("char_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Inventory not found! " + err.Error()})
