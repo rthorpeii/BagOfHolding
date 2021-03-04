@@ -10,10 +10,10 @@ import Table from './table';
 
 
 export default function InventoryPage() {
-    const [owned, setOwned] = useState([]); //table data
-    const [consumed, setConsumed] = useState([]); //table data
+    const [owned, setOwned] = useState([]); // owned items
+    const [consumed, setConsumed] = useState([]); // consumed items
     const [character, setCharacter] = useState({})
-    const [costTotal, setCostTotal] = useState([])
+    const [costTotal, setCostTotal] = useState(0)
 
     //for error handling
     const [iserror, setIserror] = useState(false)
