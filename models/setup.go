@@ -1,9 +1,11 @@
 package models
 
 import (
+	"database/sql"
+	"fmt"
 	"os"
 
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -25,20 +27,43 @@ func ConnectDataBase() {
 	default:
 		logLevel = logger.Info
 	}
-
-	database, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+	gormConfig := gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
-	})
-
-	if err != nil {
-		panic("Failed to connect to database!")
 	}
+
+	var database *gorm.DB
+
+	uri := os.Getenv("DATABASE_URL")
+	if uri == "" {
+		host := os.Getenv("POSTGRES_HOST")
+		user := os.Getenv("POSTGRES_USER")
+		password := os.Getenv("POSTGRES_PASS")
+		dbname := os.Getenv("POSTGRES_DB")
+		port := os.Getenv("POSTGRES_PORT")
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbname, port)
+		db, err := gorm.Open(postgres.Open(dsn), &gormConfig)
+		if err != nil {
+			panic("Failed to connect to database!")
+		}
+		database = db
+	} else {
+		sqlDB, err := sql.Open("postgres", uri)
+		if err != nil {
+			panic("Failed to connect to database!")
+		}
+		db, err := gorm.Open(postgres.New(postgres.Config{
+			Conn: sqlDB,
+		}), &gormConfig)
+		if err != nil {
+			panic("Failed to connect to database!")
+		}
+		database = db
+	}
+
 	database.AutoMigrate(&Item{})
 	database.AutoMigrate(&InventoryEntry{})
 	database.AutoMigrate(&User{})
 	database.AutoMigrate(&Character{})
-	database.Logger.LogMode(logger.Info)
-	// database.LogMode(true)
 
 	DB = database
 }

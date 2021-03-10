@@ -15,6 +15,9 @@
 # vendor/
 test.db
 
+#Environment variables
+.env
+
 #Api
 /ui/bag-of-holding/node_modules
 /ui/bag-of-holding/.pnp

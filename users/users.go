@@ -16,27 +16,15 @@ func CharacterExists(userID, characterID interface{}) bool {
 }
 
 // ConsumedItems returns a slice of consumed Inventory entries for the character
-func consumedItems(characterID interface{}) ([]models.InventoryEntry, error) {
-	var consumedItems []models.InventoryEntry
+func getEntries(characterID interface{}, consumed bool) ([]models.InventoryEntry, error) {
+	var entries []models.InventoryEntry
 	if err := models.DB.
 		Joins("JOIN items on inventory_entries.item_id = items.id").
-		Where("character_id = ? AND Consumed = TRUE", characterID).
-		Preload("Item").Find(&consumedItems).Error; err != nil {
+		Where("character_id = ? AND Consumed = ?", characterID, consumed).
+		Preload("Item").Find(&entries).Error; err != nil {
 		return nil, fmt.Errorf("Error finding consumed items: %v", err)
 	}
-	return consumedItems, nil
-}
-
-// ownedItems returns a slice of non-consumed Inventory entries for the character
-func ownedItems(characterID interface{}) ([]models.InventoryEntry, error) {
-	var ownedItems []models.InventoryEntry
-	if err := models.DB.
-		Joins("JOIN items on inventory_entries.item_id = items.id").
-		Where("character_id = ? AND Consumed = False", characterID).
-		Preload("Item").Find(&ownedItems).Error; err != nil {
-		return nil, fmt.Errorf("Error finding owned items: %v", err)
-	}
-	return ownedItems, nil
+	return entries, nil
 }
 
 // FindInventory creates an Inventory object for the user/character pair input
@@ -46,11 +34,11 @@ func FindInventory(userID uint, characterID uint) (models.Inventory, error) {
 		return inventory, fmt.Errorf("Invalid Character/User pair")
 	}
 
-	owned, err := ownedItems(characterID)
+	owned, err := getEntries(characterID, false)
 	if err != nil {
 		return inventory, err
 	}
-	consumed, err := consumedItems(characterID)
+	consumed, err := getEntries(characterID, true)
 	if err != nil {
 		return inventory, err
 	}
