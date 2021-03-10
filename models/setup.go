@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	// Importing the postgres sql driver
+	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -43,19 +45,19 @@ func ConnectDataBase() {
 		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", host, user, password, dbname, port)
 		db, err := gorm.Open(postgres.Open(dsn), &gormConfig)
 		if err != nil {
-			panic("Failed to connect to database!")
+			panic("Failed to connect to database!" + err.Error())
 		}
 		database = db
 	} else {
 		sqlDB, err := sql.Open("postgres", uri)
 		if err != nil {
-			panic("Failed to connect to database!")
+			panic("Failed to open database!" + err.Error())
 		}
 		db, err := gorm.Open(postgres.New(postgres.Config{
 			Conn: sqlDB,
 		}), &gormConfig)
 		if err != nil {
-			panic("Failed to connect to database!")
+			panic("Failed to connect to database!" + err.Error())
 		}
 		database = db
 	}
