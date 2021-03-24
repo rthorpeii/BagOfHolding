@@ -120,7 +120,7 @@ export default function InventoryPage() {
         var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         if (mounted) {
-            setCostTotal(Number(ownedCost) + Number(consumedCost) / 2)
+            setCostTotal(Number(ownedCost) + Number(consumedCost))
         }
         return () => mounted = false;
     }, [owned, consumed])
