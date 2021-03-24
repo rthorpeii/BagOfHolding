@@ -2,6 +2,8 @@ import { useContext, useEffect } from 'react';
 import AuthContext from './authcontext.js'
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
+import ApiClient from './api-client'
+
 var jwt = require('jsonwebtoken');
 
 function AuthButton() {
@@ -50,9 +52,16 @@ function AuthButton() {
     }
 
     const onLoginSuccess = (response) => {
-        window.localStorage.setItem('authToken', response.tokenObj.id_token);
+        ApiClient.post("/login", { token: response.tokenObj.id_token })
+            .then(res => {
+                window.localStorage.setItem('authToken', res.data.token);
+                ApiClient.defaults.headers.Authorization = "Bearer " + res.data.token;
+                setLoggedIn(true)
+            })
+            .catch(error => {
+                console.log("Authentication failed")
+            })
         refreshTokenSetup(response);
-        setLoggedIn(true)
     }
 
     const onLogoutSuccess = (response) => {

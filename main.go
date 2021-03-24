@@ -2,8 +2,8 @@ package main
 
 import (
 	"BagOfHolding/controllers"
+	"BagOfHolding/middleware"
 	"BagOfHolding/models"
-	"BagOfHolding/oauth"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/contrib/static"
@@ -11,19 +11,20 @@ import (
 )
 
 func main() {
-	router := gin.Default()
+	// setup a connection to our database
+	models.ConnectDataBase()
 
+	// Initialize and configure our router
+	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AddAllowHeaders("authorization")
 	router.Use(cors.New(config))
 
-	models.ConnectDataBase()
-
 	// React files
 	router.Use(static.Serve("/", static.LocalFile("./ui/build", true)))
 
-	// Public endpoints
+	// Public API endpoints
 	public := router.Group("/api")
 	public.GET("/items", controllers.GetItems)
 	public.GET("/items/:id", controllers.GetItem)
@@ -32,8 +33,10 @@ func main() {
 	public.DELETE("/items/:id", controllers.DeleteItem)
 	public.GET("/names/", controllers.GetItemNames)
 
-	// Authorized endpoints
-	authorized := router.Group("/api", oauth.AuthorizeUser)
+	// Authorized API endpoints
+	authMiddleware := middleware.InitMiddleware
+	public.POST("/login", authMiddleware().LoginHandler)
+	authorized := router.Group("/api", authMiddleware().MiddlewareFunc())
 	// Character endpoints
 	authorized.GET("/characters/", controllers.GetCharacters)
 	authorized.POST("/characters/", controllers.CreateCharacter)

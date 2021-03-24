@@ -17,9 +17,8 @@ var DB *gorm.DB
 
 // ConnectDataBase creates a connection to our database
 func ConnectDataBase() {
-	audience := os.Getenv("GORM_LOGGING")
 	var logLevel logger.LogLevel
-	switch audience {
+	switch os.Getenv("GORM_LOGGING") {
 	case "error":
 		logLevel = logger.Error
 	case "warn":

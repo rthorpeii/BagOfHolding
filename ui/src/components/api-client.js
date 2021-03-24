@@ -7,7 +7,7 @@ export const ApiClient = axios.create({
   // Development
   baseURL: 'http://localhost:8080/api/',
 
-  headers: {'authorization': "bearer " + window.localStorage.getItem('authToken')}
+  headers: {'Authorization': "Bearer " + window.localStorage.getItem('authToken')}
 });
 
 export default ApiClient
