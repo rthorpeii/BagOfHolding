@@ -86,13 +86,6 @@ type UpdateItemInput struct {
 // UpdateItem updates an existing item based on its id
 // POST /items
 func UpdateItem(c *gin.Context) {
-	// Get model if exist
-	var item models.Item
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&item).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
-	}
-
 	// Validate input
 	var input UpdateItemInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -100,7 +93,18 @@ func UpdateItem(c *gin.Context) {
 		return
 	}
 
-	models.DB.Model(&item).Updates(input)
+	// Get model if exist
+	var item models.Item
+	if err := models.DB.Where("id = ?", c.Param("id")).First(&item).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+	// Update the values
+	item.Name = input.Name
+	item.Type = input.Type
+	item.Rarity = input.Rarity
+	item.Cost = input.Cost
+	models.DB.Model(&item).Updates(item)
 
 	c.JSON(http.StatusOK, gin.H{"data": item})
 }
