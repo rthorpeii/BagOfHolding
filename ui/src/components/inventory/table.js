@@ -1,10 +1,7 @@
 import MaterialTable from "@material-table/core";
 
-import Columns from './columns'
-
 export default function Table(props) {
-    const columns = Columns
-    const { owned, removeItem } = props
+    const { owned, removeItem, columns } = props
 
     const onRemove = (oldData, consumed) => {
         removeItem(oldData, consumed)

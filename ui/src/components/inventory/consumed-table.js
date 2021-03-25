@@ -1,10 +1,8 @@
 import MaterialTable from "@material-table/core";
 
-import Columns from './columns'
 
 export default function ConsumedTable(props) {
-    const columns = Columns
-    const { consumed, removeItem } = props
+    const { consumed, removeItem, columns } = props
 
     const onRemove = (oldData, consumed) => {
         removeItem(oldData, consumed)

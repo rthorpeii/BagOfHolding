@@ -7,6 +7,8 @@ import CharacterCard from './character-card'
 import ConsumedTable from './consumed-table'
 import PurchaseCard from './purchase-card';
 import Table from './table';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useTheme } from '@material-ui/core/styles';
 
 
 export default function InventoryPage() {
@@ -18,6 +20,18 @@ export default function InventoryPage() {
     //for error handling
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
+
+    const theme = useTheme();
+    var sizeMatches = useMediaQuery(theme.breakpoints.down("xs"))
+    const Columns = [
+        { title: "id", field: "id", hidden: true },
+        { title: "user_id", field: "user_id", hidden: true },
+        { title: "item_id", field: "user_id", hidden: true },
+        { title: "Name", field: "Item.name" },
+        { title: "Rarity", field: "Item.rarity", hidden: sizeMatches },
+        { title: "Cost", field: "Item.cost", type: "numeric" },
+        { title: "Count", field: "count", type: "numeric" },
+    ]
 
     // Validates that a character is selected
     const validateCharacter = () => {
@@ -158,7 +172,7 @@ export default function InventoryPage() {
                 </Grid>
                 <Grid item sm={1} />
                 <Grid item sm={1} md={2} />
-                <Grid item sm={12} md={8}>
+                <Grid item xs={12} md={8}>
                     <div>
                         {iserror &&
                             <Alert severity="error">
@@ -168,12 +182,18 @@ export default function InventoryPage() {
                             </Alert>
                         }
                     </div>
-                    <Table owned={owned} removeItem={removeItem} />
+                    <Table
+                        owned={owned}
+                        removeItem={removeItem}
+                        columns={Columns} />
                 </Grid>
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />
-                <Grid item sm={12} md={8}>
-                    <ConsumedTable consumed={consumed} removeItem={unconsumeItem} />
+                <Grid item xs={12} md={8}>
+                    <ConsumedTable
+                        consumed={consumed}
+                        removeItem={unconsumeItem}
+                        columns={Columns} />
                 </Grid>
             </Grid >
         </div >
