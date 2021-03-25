@@ -4,8 +4,8 @@ import Columns from './columns'
 
 export default function Table(props) {
     const columns = Columns
-    const {owned, removeItem} = props
-    
+    const { owned, removeItem } = props
+
     const onRemove = (oldData, consumed) => {
         removeItem(oldData, consumed)
     }
@@ -14,7 +14,6 @@ export default function Table(props) {
             title="Items Owned"
             columns={columns}
             data={owned}
-            // icons={tableIcons}
             editable={{
                 onRowDelete: (oldData) =>
                     new Promise((resolve) => {
@@ -25,7 +24,7 @@ export default function Table(props) {
             actions={[
                 {
                     icon: 'emoji_food_beverage',
-                    tooltip: 'Consume Item',
+                    tooltip: 'Consume',
                     onClick: (_, rowData) => new Promise((resolve) => {
                         onRemove(rowData, true)
                         resolve()
@@ -33,7 +32,12 @@ export default function Table(props) {
                 }
             ]}
             options={{
-                actionsColumnIndex: -1
+                actionsColumnIndex: -1,
+                rowStyle: (rowData, index) => {
+                    if (index % 2) {
+                        return { backgroundColor: "#333333" }
+                    }
+                }
             }}
         />
     )

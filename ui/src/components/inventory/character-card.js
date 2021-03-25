@@ -53,7 +53,7 @@ export default function CharacterCard(props) {
                     onChange={(_, value) => { setSelected(value) }}
                     renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
                 />
-                <Typography variant="h5" className={classes.gold}>
+                <Typography variant="h6" className={classes.gold}>
                     Inventory Cost: {costTotal} gp
                 </Typography>
             </CardContent>

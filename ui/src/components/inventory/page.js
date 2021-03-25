@@ -57,7 +57,6 @@ export default function InventoryPage() {
 
     // Handles selling an item
     const removeItem = (oldData, consume) => {
-        console.log(owned, consumed)
         var payload = {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
@@ -71,6 +70,24 @@ export default function InventoryPage() {
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
+                setIserror(false)
+            })
+            .catch(error => {
+                setErrorMessages(["Delete failed! Server error", error.error])
+                setIserror(true)
+            })
+    }
+
+    const unconsumeItem = (oldData, consume) => {
+        var payload = {
+            "character_id": oldData.character_id,
+            "item_id": oldData.item_id
+        }
+        ApiClient.post("/unconsume/", payload)
+            .then(res => {
+                setOwned(res.data.owned)
+                setConsumed(res.data.consumed)
+                setIserror(false)
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error", error.error])
@@ -116,6 +133,7 @@ export default function InventoryPage() {
 
     // Update the cost of the inventory when owned/consumed is updated
     useEffect(() => {
+        console.log(owned)
         let mounted = true
         var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
@@ -155,7 +173,7 @@ export default function InventoryPage() {
                 <Grid item xs={1}></Grid>
                 <Grid item sm={1} md={2} />
                 <Grid item sm={12} md={8}>
-                    <ConsumedTable consumed={consumed} />
+                    <ConsumedTable consumed={consumed} removeItem={unconsumeItem} />
                 </Grid>
             </Grid >
         </div >

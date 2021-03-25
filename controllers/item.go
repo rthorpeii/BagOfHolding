@@ -38,7 +38,7 @@ func GetItemNames(c *gin.Context) {
 
 	var items []ItemName
 
-	if err := models.DB.Model(&models.Item{}).Find(&items).Error; err != nil {
+	if err := models.DB.Model(&models.Item{}).Order("name").Find(&items).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Couldn't retrieve items"})
 		return
 	}
