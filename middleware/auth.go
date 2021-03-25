@@ -25,8 +25,8 @@ func InitAuthMiddleware() *jwt.GinJWTMiddleware {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "handy-haversack.herokuapp.com",
 		Key:         []byte(os.Getenv("JWT_KEY")),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Timeout:     time.Minute * 15,
+		MaxRefresh:  time.Hour * 72,
 		IdentityKey: identityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if user, ok := data.(models.User); ok {

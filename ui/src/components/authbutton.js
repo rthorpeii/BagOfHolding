@@ -1,8 +1,9 @@
+import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import { useContext, useEffect } from 'react';
-import AuthContext from './authcontext.js'
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
 import ApiClient from './api-client'
+import AuthContext from './authcontext.js'
 
 var jwt = require('jsonwebtoken');
 
@@ -29,23 +30,17 @@ function AuthButton() {
         return () => mounted = false;
     }, [setLoggedIn])
 
-    const refreshTokenSetup = (res) => {
-        // Timing to renew access token
-        let refreshTiming = (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
 
-        const refreshToken = async () => {
-            const newAuthRes = await res.reloadAuthResponse();
-            refreshTiming = (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
-            // saveUserToken(newAuthRes.access_token);  <-- save new token
-            localStorage.setItem('authToken', newAuthRes.id_token);
+    // Function that will be called to refresh authorization
+    const refreshAuthLogic = failedRequest => ApiClient.get('/refresh').then(tokenRefreshResponse => {
+        localStorage.setItem('authToken', tokenRefreshResponse.data.token);
+        ApiClient.defaults.headers.Authorization = "Bearer " + tokenRefreshResponse.data.token;
+        failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse.data.token;
+        return Promise.resolve();
+    });
 
-            // Setup the other timer after the first one
-            setTimeout(refreshToken, refreshTiming);
-        };
-
-        // Setup first refresh timer
-        setTimeout(refreshToken, refreshTiming);
-    };
+    // Instantiate the interceptor (you can chain it as it returns the axios instance)
+    createAuthRefreshInterceptor(ApiClient, refreshAuthLogic);
 
     const onFailure = (response) => {
         console.log(response);
@@ -61,7 +56,6 @@ function AuthButton() {
             .catch(error => {
                 console.log("Authentication failed")
             })
-        refreshTokenSetup(response);
     }
 
     const onLogoutSuccess = (response) => {
@@ -94,9 +88,6 @@ function AuthButton() {
             )}
         </AuthContext.Consumer>
     )
-
-
-
 }
 
 export default AuthButton;

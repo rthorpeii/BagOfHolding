@@ -34,8 +34,10 @@ func main() {
 	public.GET("/names/", controllers.GetItemNames)
 
 	// Authorized API endpoints
-	authMiddleware := middleware.InitMiddleware
+	// Login and refresh
+	authMiddleware := middleware.InitAuthMiddleware
 	public.POST("/login", authMiddleware().LoginHandler)
+	public.GET("/refresh", authMiddleware().RefreshHandler)
 	authorized := router.Group("/api", authMiddleware().MiddlewareFunc())
 	// Character endpoints
 	authorized.GET("/characters/", controllers.GetCharacters)
