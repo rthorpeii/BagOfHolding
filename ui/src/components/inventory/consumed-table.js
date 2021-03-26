@@ -9,7 +9,7 @@ export default function ConsumedTable(props) {
     }
     return (
         <MaterialTable
-            title="Items Consumed"
+            title="Consumed Items"
             columns={columns}
             data={consumed}
             actions={[
@@ -28,7 +28,8 @@ export default function ConsumedTable(props) {
                     if (index % 2) {
                         return { backgroundColor: "#333333" }
                     }
-                }
+                },
+                search: false,
             }}
         />
     )

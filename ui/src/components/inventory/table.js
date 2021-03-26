@@ -8,7 +8,7 @@ export default function Table(props) {
     }
     return (
         <MaterialTable
-            title="Items Owned"
+            title="Owned Items"
             columns={columns}
             data={owned}
             editable={{
@@ -34,7 +34,8 @@ export default function Table(props) {
                     if (index % 2) {
                         return { backgroundColor: "#333333" }
                     }
-                }
+                },
+                search: false,
             }}
         />
     )

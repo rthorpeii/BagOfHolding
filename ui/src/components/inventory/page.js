@@ -29,8 +29,19 @@ export default function InventoryPage() {
         { title: "item_id", field: "user_id", hidden: true },
         { title: "Name", field: "Item.name" },
         { title: "Rarity", field: "Item.rarity", hidden: sizeMatches },
-        { title: "Cost", field: "Item.cost", type: "numeric" },
-        { title: "Count", field: "count", type: "numeric" },
+        {
+            title: "Cost",
+            field: "Item.cost",
+            type: "numeric",
+            cellStyle: { padding: 0 },
+            headerStyle: { padding: 0 },
+
+        },
+        {
+            title: "Count", field: "count", type: "numeric",
+            cellStyle: { padding: 0 },
+            headerStyle: { padding: 0 },
+        },
     ]
 
     // Validates that a character is selected
