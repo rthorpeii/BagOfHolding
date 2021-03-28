@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import Grid from '@material-ui/core/Grid'
+import { Grid, Hidden } from '@material-ui/core/';
 import Alert from '@material-ui/lab/Alert';
 
 import ApiClient from '../api-client'
 import CharacterCard from './character-card'
 import ConsumedTable from './consumed-table'
-import PurchaseCard from './purchase-card';
+import BuyItemCard from './buy-item-card';
 import Table from './table';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
@@ -21,37 +21,18 @@ export default function InventoryPage() {
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
-    const theme = useTheme();
-    var sizeMatches = useMediaQuery(theme.breakpoints.down("xs"))
-    const Columns = [
-        { title: "id", field: "id", hidden: true },
-        { title: "user_id", field: "user_id", hidden: true },
-        { title: "item_id", field: "user_id", hidden: true },
-        { title: "Name", field: "Item.name" },
-        { title: "Rarity", field: "Item.rarity", hidden: sizeMatches },
-        {
-            title: "Cost",
-            field: "Item.cost",
-            type: "numeric",
-            cellStyle: { padding: 1 },
-            headerStyle: { padding: 1 },
-
-        },
-        { title: "Qty", field: "count", type: "numeric", },
-    ]
-
     // Validates that a character is selected
     const validateCharacter = () => {
         console.log("Character: ", character)
-        if (Object.keys(character).length === 0 && character.constructor === Object) {
-            setErrorMessages(["Please Select a Character"])
+        if (character === null || (character.constructor === Object && Object.keys(character).length === 0)) {
+            setErrorMessages(["Please select a character. If you have no characters, add one in the Characters tab"])
             setIserror(true)
             return false
         }
         return true
     }
 
-    // Handles purchasing an item
+    // Handles buying an item
     const buyItem = (item) => {
         if (Object.keys(item).length === 0 && item.constructor === Object) {
             setErrorMessages(["Please Select an Item"])
@@ -65,14 +46,15 @@ export default function InventoryPage() {
             "character_id": character.id,
             "item_id": item.ID
         }
-        // Purchase the selected item
+        // Buy the selected item
         ApiClient.post("/buy/", payload)
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
+                setCostTotal(res.data.cost)
                 setIserror(false)
             }).catch(error => {
-                setErrorMessages(["Cannot purchase Item"])
+                setErrorMessages(["Cannot Buy Item"])
                 setIserror(true)
             })
     }
@@ -83,15 +65,11 @@ export default function InventoryPage() {
             "character_id": oldData.character_id,
             "item_id": oldData.item_id
         }
-        // What endpoint should we post to
-        var endpoint = "/sell/"
-        if (consume === true) {
-            endpoint = "/consume/"
-        }
-        ApiClient.post(endpoint, payload)
+        ApiClient.post(consume ? "/consume/" : "/sell/", payload)
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
+                setCostTotal(res.data.cost)
                 setIserror(false)
             })
             .catch(error => {
@@ -109,6 +87,7 @@ export default function InventoryPage() {
             .then(res => {
                 setOwned(res.data.owned)
                 setConsumed(res.data.consumed)
+                setCostTotal(res.data.cost)
                 setIserror(false)
             })
             .catch(error => {
@@ -130,6 +109,7 @@ export default function InventoryPage() {
                 if (mounted) {
                     setOwned(res.data.owned)
                     setConsumed(res.data.consumed)
+                    setCostTotal(res.data.cost)
                     setIserror(false)
                 }
             })
@@ -143,42 +123,45 @@ export default function InventoryPage() {
         return () => mounted = false;
     }, [character])
 
-    // Set the error message to false on init
-    useEffect(() => {
-        let mounted = true
-        if (mounted) {
-            setIserror(false)
-            setErrorMessages([])
-        }
-        return () => mounted = false;
-    }, [])
+    // Columns used in the tables
+    const theme = useTheme();
+    var sizeMatches = useMediaQuery(theme.breakpoints.down("xs"))
+    const Columns = [
+        { title: "id", field: "id", hidden: true },
+        { title: "user_id", field: "user_id", hidden: true },
+        { title: "item_id", field: "user_id", hidden: true },
+        { title: "Name", field: "Item.name" },
+        { title: "Rarity", field: "Item.rarity", hidden: sizeMatches },
+        {
+            title: "Cost",
+            field: "Item.cost",
+            type: "numeric",
+            cellStyle: { padding: 1 },
+            headerStyle: { padding: 1 },
 
-    // Update the cost of the inventory when owned/consumed is updated
-    useEffect(() => {
-        let mounted = true
-        var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
-        var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
-        if (mounted) {
-            setCostTotal(Number(ownedCost) + Number(consumedCost))
-        }
-        return () => mounted = false;
-    }, [owned, consumed])
+        },
+        { title: "Qty", field: "count", type: "numeric", },
+    ]
 
     return (
         <div className="App">
             <Grid container spacing={1}>
-                <Grid item sm={12} md={2} />
+                <Hidden smDown>
+                    <Grid item md={2} />
+                </Hidden>
                 <Grid item xs={12} sm={6} md={4}>
                     <CharacterCard
                         onChange={setCharacter}
                         costTotal={costTotal} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <PurchaseCard
+                    <BuyItemCard
                         buyItem={buyItem} />
                 </Grid>
-                <Grid item sm={1} />
-                <Grid item sm={1} md={2} />
+                <Hidden smDown>
+                    <Grid item md={1} />
+                    <Grid item md={2} />
+                </Hidden>
                 <Grid item xs={12} md={8}>
                     <div>
                         {iserror &&
@@ -194,8 +177,10 @@ export default function InventoryPage() {
                         removeItem={removeItem}
                         columns={Columns} />
                 </Grid>
-                <Grid item xs={1}></Grid>
-                <Grid item sm={1} md={2} />
+                <Hidden smDown>
+                    <Grid item md={1}></Grid>
+                    <Grid item md={2} />
+                </Hidden>
                 <Grid item xs={12} md={8}>
                     <ConsumedTable
                         consumed={consumed}

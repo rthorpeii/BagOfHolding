@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Box, Tabs, Tab, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
+import { Box, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
 import { createMuiTheme } from '@material-ui/core/styles';
+import { useContext, useEffect, useState } from 'react';
 
 import AuthContext from './components/authcontext'
+
 import CharacterTable from './components/character-table';
 import Header from './components/header'
 import InventoryPage from './components/inventory/page';
 import ItemTable from './components/itemtable/itemtable';
+import TabBar from './components/tabbar';
 
 const theme = createMuiTheme({
     palette: {
@@ -18,9 +20,7 @@ theme.shadows = []
 
 export default function App() {
     const [value, setValue] = useState(0);
-    const handleChange = (_, newValue) => {
-        setValue(newValue);
-    };
+    const { loggedIn } = useContext(AuthContext)
 
     function TabPanel(props) {
         const { children, value, index, ...other } = props;
@@ -30,20 +30,20 @@ export default function App() {
             </div>
         );
     }
+
+    // Return to the items tab if logged out
+    useEffect(()=> {
+        if (!loggedIn) {
+            setValue(0)
+        }
+    }, [loggedIn])
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Header />
             <Container>
-                <AuthContext.Consumer>
-                    {({ loggedIn }) => (
-                        <Tabs value={value} onChange={handleChange}>
-                            <Tab label="Items" />
-                            <Tab label="Inventory" disabled={!loggedIn} />
-                            <Tab label="Characters" disabled={!loggedIn} />
-                        </Tabs>
-                    )}
-                </AuthContext.Consumer>
+                <TabBar value={value} setValue={setValue} />
             </Container>
             <TabPanel value={value} index={0}>
                 <ItemTable />

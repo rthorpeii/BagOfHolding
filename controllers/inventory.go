@@ -19,7 +19,12 @@ func GetInventory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"owned": inventory.Owned, "consumed": inventory.Consumed})
+	c.JSON(http.StatusOK,
+		gin.H{
+			"owned":    inventory.Owned,
+			"consumed": inventory.Consumed,
+			"cost":     inventory.SumCost(),
+		})
 }
 
 // ModifyInventoryInput is the item input for buying/selling/consuming items
@@ -51,7 +56,12 @@ func BuyItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"owned": inventory.Owned, "consumed": inventory.Consumed})
+	c.JSON(http.StatusOK,
+		gin.H{
+			"owned":    inventory.Owned,
+			"consumed": inventory.Consumed,
+			"cost":     inventory.SumCost(),
+		})
 }
 
 // SellItem Sells one instance of an item for a character
@@ -88,7 +98,12 @@ func removeAnItem(c *gin.Context, consume bool) (int, gin.H) {
 	if err != nil {
 		return http.StatusBadRequest, gin.H{"error": err.Error()}
 	}
-	return http.StatusOK, gin.H{"owned": inventory.Owned, "consumed": inventory.Consumed}
+	return http.StatusOK,
+		gin.H{
+			"owned":    inventory.Owned,
+			"consumed": inventory.Consumed,
+			"cost":     inventory.SumCost(),
+		}
 }
 
 // UnconsumeItem restores a consumed item to the inventory
@@ -116,7 +131,12 @@ func UnconsumeItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"owned": inventory.Owned, "consumed": inventory.Consumed})
+	c.JSON(http.StatusOK,
+		gin.H{
+			"owned":    inventory.Owned,
+			"consumed": inventory.Consumed,
+			"cost":     inventory.SumCost(),
+		})
 }
 
 // Validate that the input has a proper user/character pair
