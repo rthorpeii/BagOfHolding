@@ -30,6 +30,7 @@ export default function Table(props) {
             ]}
             options={{
                 actionsColumnIndex: -1,
+                paging: false,
                 rowStyle: (rowData, index) => {
                     if (index % 2) {
                         return { backgroundColor: "#333333" }

@@ -9,7 +9,7 @@ const useStyles = makeStyles((_) => ({
         flexDirection: "column",
         height: "100%",
     },
-    gold: {
+    costText: {
         paddingTop: '10px',
     }
 }));
@@ -17,21 +17,23 @@ const useStyles = makeStyles((_) => ({
 export default function CharacterCard(props) {
     const classes = useStyles();
 
-    const {costTotal, onChange} = props
+    const { costTotal, onChange } = props
     const [characters, setCharacters] = useState([])
     const [selected, setSelected] = useState({})
 
     const getCharacters = () => {
         ApiClient.get("/characters/")
             .then(res => {
-                setCharacters(res.data.data)
-                setSelected(res.data.data[0])
+                setCharacters(res.data.characters)
+                if (res.data.characters.length > 0) {
+                    setSelected(res.data.characters[0])
+                }
             })
             .catch(error => {
                 console.log("Cannot load character names")
             })
     }
-    
+
     // When the selected value is updated, alert the parent
     useEffect(() => {
         onChange(selected)
@@ -53,7 +55,7 @@ export default function CharacterCard(props) {
                     onChange={(_, value) => { setSelected(value) }}
                     renderInput={(params) => <TextField {...params} label="Character" variant="outlined" />}
                 />
-                <Typography variant="h6" className={classes.gold}>
+                <Typography variant="h6" className={classes.costText}>
                     Inventory Cost: {costTotal} gp
                 </Typography>
             </CardContent>

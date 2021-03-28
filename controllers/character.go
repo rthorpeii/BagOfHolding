@@ -30,7 +30,7 @@ func CreateCharacter(c *gin.Context) {
 		Name:   input.Name,
 	}
 	models.DB.Create(&character)
-	c.JSON(http.StatusOK, gin.H{"data": character})
+	c.JSON(http.StatusOK, gin.H{"character": character})
 }
 
 // GetCharacters gets the characters of the authenticated user
@@ -41,7 +41,7 @@ func GetCharacters(c *gin.Context) {
 
 	// We don't mind returning an empty list
 	models.DB.Where("user_id = ?", userID).Find(&characters)
-	c.JSON(http.StatusOK, gin.H{"data": characters})
+	c.JSON(http.StatusOK, gin.H{"characters": characters})
 }
 
 // DeleteCharacters deletes the character matching the id
@@ -56,6 +56,7 @@ func DeleteCharacters(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Character not found!"})
 		return
 	}
-	models.DB.Delete(character)
+	character.ID = users.StringToID(c.Param("id"))
+	models.DB.Delete(&character)
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }

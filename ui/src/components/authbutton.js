@@ -1,4 +1,5 @@
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
+import { Button } from '@material-ui/core';
 import { useContext, useEffect } from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
@@ -72,6 +73,13 @@ function AuthButton() {
                             buttonText='Logout'
                             onLogoutSuccess={onLogoutSuccess}
                             onFailure={onFailure}
+                            render={renderProps => (
+                                <Button
+                                    variant="contained"
+                                    onClick={renderProps.onClick}
+                                    disabled={renderProps.disabled}
+                                >Logout</Button>
+                            )}
                             theme="dark"
                         />
                         : <GoogleLogin

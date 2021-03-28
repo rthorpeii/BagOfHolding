@@ -1,49 +1,40 @@
-import { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid'
 import Alert from '@material-ui/lab/Alert';
 import MaterialTable from "@material-table/core";
+import { useState, useEffect } from 'react';
 
 import ApiClient from './api-client'
 
 export default function CharacterTable() {
-    const [data, setData] = useState([]); //table data
-
-    //for error handling
+    const [characters, setCharacters] = useState([]);
     const [iserror, setIserror] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
-    const handleRowAdd = (newData, resolve) => {
-        //validation
-        let errorList = []
-        if (newData.name === undefined) {
-            errorList.push("Please enter character name")
-        } if (errorList.length < 1) { //no error
-            ApiClient.post("/characters/", newData)
-                .then(res => {
-                    let dataToAdd = [...data];
-                    newData.id = res.data.data.id
-                    dataToAdd.push(newData);
-                    setData(dataToAdd);
-                    setErrorMessages([])
-                    setIserror(false)
-                })
-                .catch(error => {
-                    setErrorMessages(["Cannot add data. Server error!"])
-                    setIserror(true)
-                })
-        } else {
-            setErrorMessages(errorList)
+    const handleRowAdd = (newCharacter, resolve) => {
+        if (newCharacter.name === undefined) {
+            setErrorMessages(["Please enter character name"])
             setIserror(true)
+            return
         }
+        ApiClient.post("/characters/", newCharacter)
+            .then(res => {
+                setCharacters(characters.concat(res.data.character));
+                setIserror(false)
+            })
+            .catch(error => {
+                setErrorMessages(["Cannot add data. Server error!" + error])
+                setIserror(true)
+            })
     }
 
     const handleRowDelete = (oldData, resolve) => {
         ApiClient.delete("/characters/" + oldData.id)
             .then(res => {
-                const dataDelete = [...data];
+                const dataDelete = [...characters];
                 const index = oldData.tableData.id;
                 dataDelete.splice(index, 1);
-                setData([...dataDelete]);
+                setCharacters([...dataDelete]);
+                setErrorMessages([])
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error"])
@@ -54,7 +45,7 @@ export default function CharacterTable() {
     useEffect(() => {
         ApiClient.get("/characters/")
             .then(res => {
-                setData(res.data.data)
+                setCharacters(res.data.characters)
             })
             .catch(error => {
                 setErrorMessages(["Cannot load character data"])
@@ -84,7 +75,7 @@ export default function CharacterTable() {
                     <MaterialTable
                         title="Your Characters"
                         columns={columns}
-                        data={data}
+                        data={characters}
                         editable={{
                             onRowAdd: (newData) =>
                                 new Promise((resolve) => {
@@ -99,12 +90,13 @@ export default function CharacterTable() {
                         }}
                         options={{
                             actionsColumnIndex: -1,
+                            paging: false,
                             search: false
                         }}
                     />
                 </Grid>
                 <Grid item xs={3}>
-                    
+
                 </Grid>
             </Grid >
         </div >

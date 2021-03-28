@@ -150,7 +150,9 @@ export default function ItemTable() {
                                         }) : null,
                                 }}
                                 options={{
-                                    actionsColumnIndex: -1
+                                    actionsColumnIndex: -1,
+                                    pageSize: 10,
+                                    pageSizeOptions: [10, 25, 50, ],
                                 }}
                             />
                         </Grid>

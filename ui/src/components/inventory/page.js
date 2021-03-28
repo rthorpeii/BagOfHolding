@@ -33,19 +33,16 @@ export default function InventoryPage() {
             title: "Cost",
             field: "Item.cost",
             type: "numeric",
-            cellStyle: { padding: 0 },
-            headerStyle: { padding: 0 },
+            cellStyle: { padding: 1 },
+            headerStyle: { padding: 1 },
 
         },
-        {
-            title: "Count", field: "count", type: "numeric",
-            cellStyle: { padding: 0 },
-            headerStyle: { padding: 0 },
-        },
+        { title: "Qty", field: "count", type: "numeric", },
     ]
 
     // Validates that a character is selected
     const validateCharacter = () => {
+        console.log("Character: ", character)
         if (Object.keys(character).length === 0 && character.constructor === Object) {
             setErrorMessages(["Please Select a Character"])
             setIserror(true)
@@ -158,7 +155,6 @@ export default function InventoryPage() {
 
     // Update the cost of the inventory when owned/consumed is updated
     useEffect(() => {
-        console.log(owned)
         let mounted = true
         var ownedCost = [owned.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
         var consumedCost = [consumed.reduce((a, b) => a + (b.Item.cost * b.count || 0), 0)]
