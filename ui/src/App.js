@@ -1,4 +1,4 @@
-import { Box, Container, CssBaseline, ThemeProvider } from '@material-ui/core';
+import { CssBaseline, ThemeProvider } from '@material-ui/core';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { useContext, useEffect, useState } from 'react';
 
@@ -8,7 +8,8 @@ import CharacterTable from './components/character-table';
 import Header from './components/header'
 import InventoryPage from './components/inventory/page';
 import ItemTable from './components/itemtable/itemtable';
-import TabBar from './components/tabbar';
+import TabBar from './components/tab-bar';
+import TabPanel from './components/tab-panel';
 
 const theme = createMuiTheme({
     palette: {
@@ -22,17 +23,8 @@ export default function App() {
     const [value, setValue] = useState(0);
     const { loggedIn } = useContext(AuthContext)
 
-    function TabPanel(props) {
-        const { children, value, index, ...other } = props;
-        return (
-            <div {...other}>
-                {value === index && <Box p={3}>{children}</Box>}
-            </div>
-        );
-    }
-
     // Return to the items tab if logged out
-    useEffect(()=> {
+    useEffect(() => {
         if (!loggedIn) {
             setValue(0)
         }
@@ -42,9 +34,7 @@ export default function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Header />
-            <Container>
-                <TabBar value={value} setValue={setValue} />
-            </Container>
+            <TabBar value={value} setValue={setValue} />
             <TabPanel value={value} index={0}>
                 <ItemTable />
             </TabPanel>

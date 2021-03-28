@@ -11,20 +11,20 @@ import (
 // GET /items
 func GetItems(c *gin.Context) {
 	var items []models.Item
-	models.DB.Find(&items)
-	c.JSON(http.StatusOK, gin.H{"data": items})
+	if err := models.DB.Order("name").Find(&items).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not find items"})
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
 // GetItem gets a single item if it exists
 // GET /items/:id
 func GetItem(c *gin.Context) {
 	var item models.Item
-
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&item).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": item})
 }
 
@@ -37,12 +37,10 @@ func GetItemNames(c *gin.Context) {
 	}
 
 	var items []ItemName
-
 	if err := models.DB.Model(&models.Item{}).Order("name").Find(&items).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Couldn't retrieve items"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
@@ -118,8 +116,6 @@ func DeleteItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-
 	models.DB.Delete(&item)
-
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }

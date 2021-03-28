@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, makeStyles, TextField, Typography } from '@material-ui/core';
+import { makeStyles, TextField, Typography } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import ApiClient from '../api-client'
@@ -45,8 +45,7 @@ export default function CharacterCard(props) {
     }, [])
 
     return (
-        <Card className={classes.mergecard}>
-            <CardContent>
+        <div className={classes.mergecard}>
                 <Autocomplete
                     id="character-selection"
                     value={selected}
@@ -58,7 +57,6 @@ export default function CharacterCard(props) {
                 <Typography variant="h6" className={classes.costText}>
                     Inventory Cost: {costTotal} gp
                 </Typography>
-            </CardContent>
-        </Card>
+        </div>
     )
 }

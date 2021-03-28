@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Card, CardContent, makeStyles, TextField } from '@material-ui/core';
+import { Button, makeStyles, TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import ApiClient from '../api-client'
@@ -34,20 +34,18 @@ export default function BuyItemCard(props) {
     }, [])
 
     return (
-        <Card className={classes.outerCard}>
-            <CardContent>
-                <Autocomplete
-                    className={classes.itemDropdown}
-                    options={items}
-                    getOptionLabel={(option) => option.Name}
-                    onChange={(_, value) => { setSelected(value) }}
-                    renderInput={(params) => <TextField {...params} label="Item to buy" variant="outlined" />}
-                />
-                <Button variant="contained"
-                    onClick={buyItem}>
-                    Buy Item
+        <div className={classes.outerCard}>
+            <Autocomplete
+                className={classes.itemDropdown}
+                options={items}
+                getOptionLabel={(option) => option.Name}
+                onChange={(_, value) => { setSelected(value) }}
+                renderInput={(params) => <TextField {...params} label="Item to buy" variant="outlined" />}
+            />
+            <Button variant="contained"
+                onClick={buyItem}>
+                Buy Item
                 </Button>
-            </CardContent>
-        </Card>
+        </div>
     )
 }

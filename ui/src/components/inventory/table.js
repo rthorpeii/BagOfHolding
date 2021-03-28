@@ -1,7 +1,9 @@
 import MaterialTable from "@material-table/core";
+import { useTheme } from '@material-ui/core/styles';
 
 export default function Table(props) {
     const { owned, removeItem, columns } = props
+    const theme = useTheme();
 
     const onRemove = (oldData, consumed) => {
         removeItem(oldData, consumed)
@@ -32,8 +34,8 @@ export default function Table(props) {
                 actionsColumnIndex: -1,
                 paging: false,
                 rowStyle: (rowData, index) => {
-                    if (index % 2) {
-                        return { backgroundColor: "#333333" }
+                    if ((index + 1) % 2) {
+                        return { backgroundColor: theme.palette.action.hover }
                     }
                 },
                 search: false,

@@ -21,7 +21,7 @@ func getEntries(characterID interface{}, consumed bool) ([]models.InventoryEntry
 	if err := models.DB.
 		Joins("JOIN items on inventory_entries.item_id = items.id").
 		Where("character_id = ? AND Consumed = ?", characterID, consumed).
-		Preload("Item").Find(&entries).Error; err != nil {
+		Order("name").Preload("Item").Find(&entries).Error; err != nil {
 		return nil, fmt.Errorf("Error finding consumed items: %v", err)
 	}
 	return entries, nil

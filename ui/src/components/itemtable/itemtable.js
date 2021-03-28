@@ -1,61 +1,51 @@
-import { useState, useEffect } from 'react';
-import Grid from '@material-ui/core/Grid'
-import Alert from '@material-ui/lab/Alert';
 import MaterialTable from "@material-table/core";
+import { Grid, Hidden } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+import { useState, useEffect } from 'react';
 
 import AuthContext from '../authcontext'
 import ApiClient from '../api-client'
 
 export default function ItemTable() {
-
-    const [data, setData] = useState([]); //table data
-
-    //for error handling
-    const [iserror, setIserror] = useState(false)
+    const [items, setItems] = useState([]);
+    const [displayError, setDisplayError] = useState(false)
     const [errorMessages, setErrorMessages] = useState([])
 
-    const handleRowAdd = (newData, resolve) => {
+    const handleRowAdd = (newItem, resolve) => {
         //validation
         let errorList = []
-        if (newData.name === undefined) {
+        if (newItem.name === undefined) {
             errorList.push("Please enter item name")
-        } if (newData.type === undefined) {
+        } if (newItem.type === undefined) {
             errorList.push("Please enter item type")
-        } if (newData.rarity === undefined) {
+        } if (newItem.rarity === undefined) {
             errorList.push("Please enter rarity")
-        } if (newData.cost === undefined || newData.cost < 0) {
+        } if (newItem.cost === undefined || newItem.cost < 0) {
             errorList.push("Please enter a proper cost")
-        } if (errorList.length < 1) { //no error
-            ApiClient.post("/items", newData)
+        } if (errorList.length < 1) {
+            ApiClient.post("/items", newItem)
                 .then(res => {
-                    let dataToAdd = [...data];
-                    newData.id = res.data.data.id
-                    dataToAdd.push(newData);
-                    setData(dataToAdd);
-                    setErrorMessages([])
-                    setIserror(false)
+                    setItems(items.concat(res.data.data));
+                    setDisplayError(false)
                 })
                 .catch(error => {
                     setErrorMessages(["Cannot add data. Server error!"])
-                    setIserror(true)
+                    setDisplayError(true)
                 })
         } else {
             setErrorMessages(errorList)
-            setIserror(true)
+            setDisplayError(true)
         }
     }
 
     const handleRowDelete = (oldData, resolve) => {
         ApiClient.delete("/items/" + oldData.id)
             .then(res => {
-                const dataDelete = [...data];
-                const index = oldData.tableData.id;
-                dataDelete.splice(index, 1);
-                setData([...dataDelete]);
+                setItems(items.filter((item) => item.id !== oldData.id));
             })
             .catch(error => {
                 setErrorMessages(["Delete failed! Server error"])
-                setIserror(true)
+                setDisplayError(true)
             })
     }
 
@@ -70,36 +60,34 @@ export default function ItemTable() {
         } if (newData.cost === undefined || newData.cost < 0) {
             errorList.push("Please enter a proper cost")
         }
-
         if (errorList.length < 1) {
             ApiClient.patch("/items/" + newData.id, newData)
                 .then(res => {
-                    const dataUpdate = [...data];
+                    const dataUpdate = [...items];
                     const index = oldData.tableData.id;
                     dataUpdate[index] = newData;
-                    setData([...dataUpdate]);
-                    setIserror(false)
+                    setItems([...dataUpdate]);
+                    setDisplayError(false)
                     setErrorMessages([])
                 })
                 .catch(error => {
                     setErrorMessages(["Update failed! Server error"])
-                    setIserror(true)
+                    setDisplayError(true)
                 })
         } else {
             setErrorMessages(errorList)
-            setIserror(true)
+            setDisplayError(true)
         }
     }
-
 
     useEffect(() => {
         ApiClient.get("/items")
             .then(res => {
-                setData(res.data.data)
+                setItems(res.data.items)
             })
             .catch(error => {
                 setErrorMessages(["Cannot load item data", error.error])
-                setIserror(true)
+                setDisplayError(true)
             })
     }, [])
 
@@ -112,54 +100,55 @@ export default function ItemTable() {
     ]
 
     return (
-        <AuthContext.Consumer>
-            {({ loggedIn }) => (
-                <div className="App">
-                    <Grid container spacing={1}>
-                        <Grid item xs={2}></Grid>
-                        <Grid item xs={12} sm={8}>
-                            <div>
-                                {iserror &&
-                                    <Alert severity="error">
-                                        {errorMessages.map((msg, i) => {
-                                            return <div key={i}>{msg}</div>
-                                        })}
-                                    </Alert>
-                                }
-                            </div>
-                            <MaterialTable
-                                title="Defined Items"
-                                columns={columns}
-                                data={data}
-
-                                editable={{
-                                    onRowUpdate: loggedIn ? (newData, oldData) =>
-                                        new Promise((resolve) => {
-                                            handleRowUpdate(newData, oldData, resolve);
-                                            resolve()
-                                        }) : null,
-                                    onRowAdd: loggedIn ? (newData) =>
-                                        new Promise((resolve) => {
-                                            handleRowAdd(newData)
-                                            resolve()
-                                        }) : null,
-                                    onRowDelete: loggedIn ? (oldData) =>
-                                        new Promise((resolve) => {
-                                            handleRowDelete(oldData, resolve)
-                                            resolve()
-                                        }) : null,
-                                }}
-                                options={{
-                                    actionsColumnIndex: -1,
-                                    pageSize: 10,
-                                    pageSizeOptions: [10, 25, 50, ],
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={3}></Grid>
-                    </Grid >
-                </div >
-            )}
-        </AuthContext.Consumer>
+        <Grid container spacing={1}>
+            <Hidden smDown>
+                <Grid item md={2} />
+            </Hidden>
+            <Grid item xs={12} md={8}>
+                <div>
+                    {displayError &&
+                        <Alert severity="error">
+                            {errorMessages.map((msg, i) => {
+                                return <div key={i}>{msg}</div>
+                            })}
+                        </Alert>
+                    }
+                </div>
+                <AuthContext.Consumer>
+                    {({ loggedIn }) => (
+                        <MaterialTable
+                            title="Defined Items"
+                            columns={columns}
+                            data={items}
+                            editable={{
+                                onRowUpdate: loggedIn ? (newData, oldData) =>
+                                    new Promise((resolve) => {
+                                        handleRowUpdate(newData, oldData, resolve);
+                                        resolve()
+                                    }) : null,
+                                onRowAdd: loggedIn ? (newData) =>
+                                    new Promise((resolve) => {
+                                        handleRowAdd(newData)
+                                        resolve()
+                                    }) : null,
+                                onRowDelete: loggedIn ? (oldData) =>
+                                    new Promise((resolve) => {
+                                        handleRowDelete(oldData, resolve)
+                                        resolve()
+                                    }) : null,
+                            }}
+                            options={{
+                                actionsColumnIndex: -1,
+                                pageSize: 10,
+                                pageSizeOptions: [10, 25, 50,],
+                            }}
+                        />
+                    )}
+                </AuthContext.Consumer>
+            </Grid>
+            <Hidden smDown>
+                <Grid item md={8} />
+            </Hidden>
+        </Grid >
     )
 }
