@@ -1,5 +1,5 @@
 import MaterialTable from "@material-table/core";
-import { Grid, Hidden } from '@material-ui/core';
+import { Grid, Hidden, TextField, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState, useEffect } from 'react';
 
@@ -93,8 +93,35 @@ export default function ItemTable() {
 
     var columns = [
         { title: "id", field: "id", hidden: true },
-        { title: "Item name", field: "name" },
-        { title: "Type", field: "type" },
+        {
+            title: "Name", field: "name",
+            render: rowData => (
+                <div>{rowData.name} <br />
+                    <Typography variant="caption" display="block" gutterBottom>{rowData.type}</Typography>
+                </div>
+            ),
+            editComponent: (props) => {
+                return (
+                    <div>
+                        <TextField
+                            id="standard-basic"
+                            label="Name"
+                            defaultValue={props.value}
+                            onChange={(e) => props.onChange(e.target.value)}
+                        />
+                        <TextField
+                            id="standard-basic"
+                            label="Type"
+                            defaultValue={props.rowData.type}
+                            onChange={(e) => props.rowData.type = e.target.value}
+                        />
+                    </div>
+
+                );
+            },
+
+        },
+        { title: "Type", field: "type", hidden: true },
         { title: "Rarity", field: "rarity" },
         { title: "Cost", field: "cost", type: "numeric" }
     ]
