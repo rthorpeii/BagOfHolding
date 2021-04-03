@@ -62,7 +62,8 @@ func ConnectDataBase() {
 	}
 
 	database.AutoMigrate(&Item{})
-	database.AutoMigrate(&InventoryEntry{})
+	database.AutoMigrate(&Consumed{})
+	database.AutoMigrate(&Owned{})
 	database.AutoMigrate(&User{})
 	database.AutoMigrate(&Character{})
 

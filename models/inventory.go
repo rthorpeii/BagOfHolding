@@ -1,20 +1,37 @@
 package models
 
-// InventoryEntry represents an entry in a users inventory
+// InventoryEntry represents the common fields shared by owned/consumed entries
 type InventoryEntry struct {
 	ID          uint `json:"id"  gorm:"primary_key"`
 	CharacterID uint `json:"character_id"`
 	ItemID      uint `json:"item_id"`
 	Item        Item
-	Consumed    bool `json:"consumed"`
-	Count       int  `json:"count"`
+	Count       int `json:"count"`
+}
+
+// Consumed represents the items that the character has consumed
+type Consumed struct {
+	InventoryEntry
+}
+
+func (Consumed) TableName() string {
+	return "consumed"
+}
+
+// Owned represents the objects owned by a character
+type Owned struct {
+	InventoryEntry
+}
+
+func (Owned) TableName() string {
+	return "owned"
 }
 
 // Inventory holds a users inventory
 type Inventory struct {
 	CharacterID uint
-	Consumed    []InventoryEntry
-	Owned       []InventoryEntry
+	Consumed    []Consumed
+	Owned       []Owned
 }
 
 // SumCost sums the cost of the owned and consumed items in the user's inventory
