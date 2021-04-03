@@ -51,15 +51,16 @@ export default function ItemTable() {
 
     const handleRowUpdate = (newData, oldData, resolve) => {  //validation
         let errorList = []
-        if (newData.name === undefined) {
+        if (newData.name === undefined || newData.name === "") {
             errorList.push("Please enter item name")
-        } if (newData.type === undefined) {
+        } if (newData.type === undefined || newData.type === "") {
             errorList.push("Please enter item type")
-        } if (newData.rarity === undefined) {
+        } if (newData.rarity === undefined || newData.rarity === "") {
             errorList.push("Please enter rarity")
-        } if (newData.cost === undefined || newData.cost < 0) {
+        } if (newData.cost === undefined || newData.cost < 0  || isNaN(newData.cost)) {
             errorList.push("Please enter a proper cost")
         }
+        console.log(newData.cost)
         if (errorList.length < 1) {
             ApiClient.patch("/items/" + newData.id, newData)
                 .then(res => {
@@ -100,19 +101,27 @@ export default function ItemTable() {
                     <Typography variant="caption" display="block" gutterBottom>{rowData.type}</Typography>
                 </div>
             ),
+            validate: (rowData) =>  {
+                if (rowData.name === ''){
+                    return 'Type cannot be empty'
+                }
+                return ''
+            },
             editComponent: (props) => {
                 return (
                     <div>
                         <TextField
-                            id="standard-basic"
                             label="Name"
+                            size="xsmall"
                             defaultValue={props.value}
+                            placeholder="Name"
                             onChange={(e) => props.onChange(e.target.value)}
                         />
                         <TextField
-                            id="standard-basic"
                             label="Type"
+                            size="small"
                             defaultValue={props.rowData.type}
+                            placeholder="Type"
                             onChange={(e) => props.rowData.type = e.target.value}
                         />
                     </div>
@@ -122,7 +131,7 @@ export default function ItemTable() {
 
         },
         { title: "Type", field: "type", hidden: true },
-        { title: "Rarity", field: "rarity" },
+        { title: "Rarity", field: "rarity", },
         { title: "Cost", field: "cost", type: "numeric" }
     ]
 
