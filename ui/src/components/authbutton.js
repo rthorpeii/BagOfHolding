@@ -31,6 +31,9 @@ export default function AuthButton() {
         ApiClient.defaults.headers.Authorization = "Bearer " + tokenRefreshResponse.data.token;
         failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse.data.token;
         return Promise.resolve();
+    }).catch(error => {
+        console.log("Authentication failed", error)
+        setLoggedIn(false)
     });
 
     // Instantiate the interceptor (you can chain it as it returns the axios instance)
