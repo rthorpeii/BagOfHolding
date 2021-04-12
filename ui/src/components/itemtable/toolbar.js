@@ -1,5 +1,5 @@
 import { MTableToolbar } from "@material-table/core";
-import { Grid, Hidden, makeStyles, Typography } from '@material-ui/core';
+import { Grid, makeStyles, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((_) => ({
     title: {
