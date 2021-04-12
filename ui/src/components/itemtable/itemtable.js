@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 
 import AuthContext from '../authcontext'
 import ApiClient from '../api-client'
+import Toolbar from './toolbar'
 
 export default function ItemTable() {
     const [items, setItems] = useState([]);
@@ -57,7 +58,7 @@ export default function ItemTable() {
             errorList.push("Please enter item type")
         } if (newData.rarity === undefined || newData.rarity === "") {
             errorList.push("Please enter rarity")
-        } if (newData.cost === undefined || newData.cost < 0  || isNaN(newData.cost)) {
+        } if (newData.cost === undefined || newData.cost < 0 || isNaN(newData.cost)) {
             errorList.push("Please enter a proper cost")
         }
         console.log(newData.cost)
@@ -101,8 +102,8 @@ export default function ItemTable() {
                     <Typography variant="caption" display="block" gutterBottom>{rowData.type}</Typography>
                 </div>
             ),
-            validate: (rowData) =>  {
-                if (rowData.name === ''){
+            validate: (rowData) => {
+                if (rowData.name === '') {
                     return 'Type cannot be empty'
                 }
                 return ''
@@ -175,8 +176,15 @@ export default function ItemTable() {
                             }}
                             options={{
                                 actionsColumnIndex: -1,
+                                header: true,
                                 pageSize: 10,
                                 pageSizeOptions: [10, 25, 50,],
+                                showTitle: false,
+                            }}
+                            components={{
+                                Toolbar: props => (
+                                    <Toolbar {...props} />
+                                ),
                             }}
                         />
                     )}
