@@ -6,10 +6,7 @@ import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import ApiClient from './api-client'
 import AuthContext from './authcontext.js'
 
-var jwt = require('jsonwebtoken');
-
-function AuthButton() {
-
+export default function AuthButton() {
     const { setLoggedIn } = useContext(AuthContext)
     useEffect(() => {
         let mounted = true;
@@ -18,16 +15,12 @@ function AuthButton() {
             if (mounted) {
                 setLoggedIn(false)
             }
-            return () => mounted = false;
-        }
-        var decodedToken = jwt.decode(token, { complete: true })
-        var dateNow = new Date();
-
-        if (decodedToken.exp < dateNow.getTime()) {
+        } else {
             if (mounted) {
                 setLoggedIn(true)
             }
         }
+
         return () => mounted = false;
     }, [setLoggedIn])
 
@@ -97,5 +90,3 @@ function AuthButton() {
         </AuthContext.Consumer>
     )
 }
-
-export default AuthButton;
